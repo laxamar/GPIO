@@ -7,25 +7,25 @@ A library for low level access to the GPIO pins on a Raspberry Pi. These pins ca
 
 By [AndrewCarterUK ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/AndrewCarterUK)
 
+Adapted by [laxamar ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/laxamar)
 ## Installing
 
 Using [composer](https://getcomposer.org/):
 
-`composer require piphp/gpio`
+`composer require piphp/gpiosysv`
 
 Or:
 
-`php composer.phar require piphp/gpio`
+`php composer.phar require piphp/gpiosysv`
 
 ## Examples
 
 ### Setting Output Pins
 ```php
-use PiPHP\GPIO\GPIO;
-use PiPHP\GPIO\Pin\PinInterface;
+use PiPHP\GPIO\GPIOSysVSrv;
 
 // Create a GPIO object
-$gpio = new GPIO();
+$gpio = new GPIOSysVSrv();
 
 // Retrieve pin 18 and configure it as an output pin
 $pin = $gpio->getOutputPin(18);

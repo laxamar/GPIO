@@ -19,7 +19,7 @@ use PiPHP\GPIO\Pin\OutputPin;
  * @copyright	Amar Micro Inc. 2021
  * @version	0.1
  */
-interface GPIOSysV extends GPIOInterface
+interface GPIOSysVInterface extends GPIOInterface
 {
     const MSG_QUEUE_ID = '26274746';
 

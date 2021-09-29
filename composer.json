@@ -1,12 +1,16 @@
 {
-    "name": "piphp/gpio",
-    "description": "A library for accessing the GPIO pins on a Raspberry Pi",
-    "keywords": ["gpio", "pi", "raspberry", "pin", "pins"],
+    "name": "piphp/gpiosysv",
+    "description": "A library for accessing the GPIO pins on a Raspberry Pi using SysV message queue and client/server model",
+    "keywords": ["gpio", "pi", "raspberry", "pin", "pins", "sysv"],
     "license": "MIT",
     "authors": [
         {
             "name": "Andrew Carter",
             "email": "andrewcarter1992@gmail.com"
+        },
+        {
+            "name": "Jacques Amar",
+            "email": "jx.gpiosysv@amar.com"
         }
     ],
     "autoload": {
