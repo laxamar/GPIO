@@ -22,6 +22,7 @@ use PiPHP\GPIO\Pin\OutputPin;
 interface GPIOSysVInterface extends GPIOInterface
 {
     const MSG_QUEUE_ID = '26274746';
+    const MSG_TYPE_GPIO = '4746';
 
     /**
      * Set pin in output mode - HIGH- Turn on any LEDs
@@ -61,7 +62,7 @@ interface GPIOSysVInterface extends GPIOInterface
      * @copyright	Amar Micro Inc. 2021
      * @version	0.1
      */
-    public function all_off(array $pin_array);
+    public function all_clear(array $pin_array);
 
     /**
      * Set pin in output mode - HIGH
