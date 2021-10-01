@@ -1,12 +1,12 @@
 <?php
 namespace PiPHP\GPIO;
 
-use PiPHP\GPIO\FileSystem\FileSystem;
-use PiPHP\GPIO\FileSystem\FileSystemInterface;
-use PiPHP\GPIO\Interrupt\InterruptWatcher;
-use PiPHP\GPIO\Pin\Pin;
-use PiPHP\GPIO\Pin\InputPin;
-use PiPHP\GPIO\Pin\OutputPin;
+// use PiPHP\GPIO\FileSystem\FileSystem;
+// use PiPHP\GPIO\FileSystem\FileSystemInterface;
+// use PiPHP\GPIO\Interrupt\InterruptWatcher;
+// use PiPHP\GPIO\Pin\Pin;
+// use PiPHP\GPIO\Pin\InputPin;
+// use PiPHP\GPIO\Pin\OutputPin;
 
 /**
  * GPIOSysV Interface class
@@ -16,7 +16,7 @@ use PiPHP\GPIO\Pin\OutputPin;
  *  Support for flashing bits on and off based on frequencies
  *
  * @author 	Jacques Amar
- * @copyright	Amar Micro Inc. 2021
+ * @copyright (c) 2021	Amar Micro Inc.
  * @version	0.1
  */
 interface GPIOSysVInterface extends GPIOInterface
@@ -28,9 +28,6 @@ interface GPIOSysVInterface extends GPIOInterface
      * Set pin in output mode - HIGH- Turn on any LEDs
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
      */
     public function set_pin(int $pin_id);
 
@@ -38,9 +35,6 @@ interface GPIOSysVInterface extends GPIOInterface
      * Set pin in output mode - LOW - Turn off any LEDs
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
      */
     public function clear_pin(int $pin_id);
 
@@ -48,9 +42,6 @@ interface GPIOSysVInterface extends GPIOInterface
      * Get pin value input mode
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
      */
     public function get_pin(int $pin_id);
 
@@ -58,50 +49,40 @@ interface GPIOSysVInterface extends GPIOInterface
      * clear a list of pins passed as an array
      * @param  	array	$pin_array	The GPIO pin list
      * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
      */
-    public function all_clear(array $pin_array);
+    public function all_clear(array $pin_array) ;
+
+    /**
+     * Map pins to binary representation of a $value
+     * @param int $value - the decimal value to change to binary and map to pins
+     * @param array	$pin_array	The list GPIO Pin IDs used
+     * @param bool $debug
+     * @access 	public
+     */
+    public function set_binary(int $value, array $pin_array, ?bool $debug=false);
+
+    /**
+     * Flash a list og GPIO pins mapped to a binary representation of a $value controlled by a master $select_pin
+     * @param int $value - the decimal value to change to binary and map to pins
+     * @param array	$pin_array	The list GPIO Pin IDs used
+     * @param int $select_pin the controlling pin that flashes all
+     * @param bool $debug
+     * @access 	public
+     */
+    public function flash_binary(int $value, array $pin_array, int $select_pin, ?bool $debug=false);
 
     /**
      * Set pin in output mode - HIGH
-     * @param  	int	$pin_id	The GPIO Pin ID used
+     * @param  	array	$pin_array	The GPIO Pin ID used
      * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
      */
-    public function set_binary($value, $PIN_ARRAY, $debug=false);
-
-    /**
-     * Set pin in output mode - HIGH
-     * @param  	int	$pin_id	The GPIO Pin ID used
-     * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
-     */
-    public function flash_binary($value, $PIN_ARRAY, $SELECT_PIN, $debug=false);
-
-    /**
-     * Set pin in output mode - HIGH
-     * @param  	int	$pin_id	The GPIO Pin ID used
-     * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
-     */
-    public function blip_binary($value, $PIN_ARRAY, $SELECT_PIN, $count=2, $empty=2, $period=1000000, $debug=false);
+    public function blip_binary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=1, ?int $period=1000000, ?bool $debug=false);
 
     /**
      * Flash a pin (HIGH then LOW) instead of turning it simply on
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
-     * @author 	Jacques Amar
-     * @copyright	Amar Micro Inc. 2021
-     * @version	0.1
      */
-    public function flash_bit(int $pin_id, $count = 5, $on_delay = 50000, $off_delay = 50000);
+    public function flash_bit(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000);
 
 }

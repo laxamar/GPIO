@@ -15,7 +15,7 @@ interface GPIOInterface
      *
      * @return InputPinInterface
      */
-    public function getInputPin($number);
+    public function getInputPin(int $number);
 
     /**
      * Get an output pin.
@@ -24,7 +24,7 @@ interface GPIOInterface
      *
      * @return OutputPinInterface
      */
-    public function getOutputPin($number);
+    public function getOutputPin(int $number);
 
     /**
      * Create an interrupt watcher.
