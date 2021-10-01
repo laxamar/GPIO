@@ -1,5 +1,5 @@
 {
-    "name": "piphp/gpiosysv",
+    "name": "laxamar/gpiosysv",
     "description": "A library for accessing the GPIO pins on a Raspberry Pi using SysV message queue and client/server model",
     "keywords": ["gpio", "pi", "raspberry", "pin", "pins", "sysv"],
     "license": "MIT",

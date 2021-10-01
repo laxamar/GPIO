@@ -21,8 +21,6 @@ namespace PiPHP\GPIO;
  */
 interface GPIOSysVInterface extends GPIOInterface
 {
-    const MSG_QUEUE_ID = '26274746';
-    const MSG_TYPE_GPIO = '4746';
 
     /**
      * Set pin in output mode - HIGH- Turn on any LEDs

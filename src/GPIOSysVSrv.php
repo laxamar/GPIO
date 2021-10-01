@@ -10,6 +10,9 @@ use PiPHP\GPIO\Pin\Pin;
 class GPIOSysVSrv implements GPIOSysVInterface
 {
 
+    const MSG_QUEUE_ID = '26274746';
+    const MSG_TYPE_GPIO = '4746';
+
     static private $instance;
     private $gpio_obj;
     private $debug;
@@ -249,7 +252,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param $message text to be logged
      * @param null $data option $data array passed as a parameter through SysV
      */
-    private function log($message, $data = null)
+    private function log(text $message, ?bool $data = null)
     {
         // TODO: Implement log() method.
     }
