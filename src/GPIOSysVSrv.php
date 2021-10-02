@@ -9,10 +9,6 @@ use PiPHP\GPIO\Pin\Pin;
 
 class GPIOSysVSrv implements GPIOSysVInterface
 {
-
-    const MSG_QUEUE_ID = '26274746';
-    const MSG_TYPE_GPIO = '4746';
-
     static private $instance;
     private $gpio_obj;
     private $debug;
@@ -24,7 +20,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
             $this_class = get_called_class();
             $_local_obj = new $this_class();
 
-            $_local_obj->gpio_obj = new GPIOSysVSrv();
+            $_local_obj->gpio_obj = new GPIO();
 
             self::$instance = $_local_obj;
         };
@@ -36,8 +32,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     function process_queue()
     {
-        $seg      = msg_get_queue(MSQ_QUEUE_ID);
-        $msg_type = MSG_TYPE_GPIO;
+        $seg      = msg_get_queue(GPIOSysVInterface::MSG_QUEUE_ID);
+        $msg_type = GPIOSysVInterface::MSG_TYPE_GPIO;
         $data     = null;
         $error_code = null;
         
@@ -126,45 +122,65 @@ class GPIOSysVSrv implements GPIOSysVInterface
         }
     }
 
-    function set_pin($pin_id) {
+    /**
+     *  {@inheritdoc}
+     */
+    function set_pin($pin_id, &$error_code = null) : bool
+    {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         $pin->setValue(PinInterface::VALUE_HIGH);
+        return true;
     }
 
-    function clear_pin($pin_id) {
+    /**
+     *  {@inheritdoc}
+     */
+    function clear_pin($pin_id, &$error_code = null) : bool
+    {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        $pin->setValue(PinInterface::VALUE_LOW);
+        return $pin->setValue(PinInterface::VALUE_LOW);
     }
 
-    function get_pin($pin_id) {
+    /**
+     *  {@inheritdoc}
+     */
+    function get_pin($pin_id, &$error_code = null) : bool
+    {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         return $pin->getValue();
     }
 
-    function all_clear($pin_array) {
+    /**
+     *  {@inheritdoc}
+     */
+    function all_clear($pin_array, &$error_code = null) : bool
+    {
         foreach ($pin_array as $pin_id) {
             $this->clear_pin($pin_id);
         }
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    function set_binary($value, $pin_array, $debug=false)
+    function set_binary($value, $pin_array, $debug=false, string &$error_code=null) : bool
     {
         $bits = sizeof($pin_array);
         // $binary = array_reverse(str_split(decbin($value),1));
         $binary = array_reverse(str_split(sprintf('%0'.$bits.'b', $value),1));
         if ($debug) echo $value . ' => '. print_r($binary,1);
         // $this->all_off($PIN_ARRAY);
+        $return_status = true;
         for ($pos=0;$pos < $bits; $pos++) {
             // foreach ($binary as $pos => $bit)
             if ($binary[$pos] == 1) {
-                $this->set_pin($pin_array[$pos]);
+                $return_status &= $this->set_pin($pin_array[$pos]);
             } else {
-                $this->clear_pin($pin_array[$pos]);
+                $return_status &= $this->clear_pin($pin_array[$pos]);
             }
         }
+        return $return_status;
     }
 
     /**
@@ -173,7 +189,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param null $toggle_pin
      * @param false $debug
      */
-    function flash_binary($value = null, $pin_array = [], $toggle_pin = null, $debug=false)
+    function flash_binary($value = null, $pin_array = [], $toggle_pin = null, $debug=false, string &$error_code=null) : bool
     {
         // set pin to turn off output
         $this->clear_pin($toggle_pin);
@@ -189,7 +205,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 $this->clear_pin($pin_array[$bits-$pos-1]);
             }
         }
-        $this->flash_bit($toggle_pin);
+        return $this->flash_bit($toggle_pin, $error_code);
     }
 
     /**
@@ -201,7 +217,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param int $period
      * @param false $debug
      */
-    function blip_binary($value = null, $pin_array = [], $toggle_pin = null, $count=1, $empty=0, $period=1000000, $debug=false)
+    function blip_binary($value = null, $pin_array = [], $toggle_pin = null, $count=1, $empty=0, $period=1000000,
+                         $debug=false, string &$error_code=null) : bool
     {
         // set pin to turn off output
         $this->clear_pin($toggle_pin);
@@ -218,14 +235,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
         }
         $delay = $period/($count+$empty);
         if ($debug) $this->log('D:'.$delay.' '.$value . ' => '. print_r($binary,1));
-        $this->flash_bit($toggle_pin, $count, $delay/2, $delay/2);
+        return $this->flash_bit($toggle_pin, $count, $delay/2, $delay/2, $error_code);
         // putting extra empty delay here??
         // usleep($empty * $delay);
     }
 
-    /**
-     *
-     */
     /**
      * flash_pin - Flash a pin instead of turning it on.
      *    loop $count time
@@ -235,16 +249,17 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param int $on_delay in useconds
      * @param int $off_delay in useconds
      */
-    function flash_bit($pin_id, $count = 1, $on_delay = 50000, $off_delay = 50000)
+    function flash_bit($pin_id, $count = 1, $on_delay = 50000, $off_delay = 50000, string &$error_code=null) : bool
     {
+        $return_status = true;
         for ($seq=1; $seq <= $count; $seq++)
         {
-            $this->clear_pin($pin_id);
+            $return_status &= $this->clear_pin($pin_id, $error_code);
             usleep($on_delay);
-            $this->set_pin($pin_id);
+            $return_status &= $this->set_pin($pin_id, $error_code);
             usleep($off_delay);
         }
-        // usleep()
+        return $return_status;
     }
 
     /**
@@ -257,6 +272,9 @@ class GPIOSysVSrv implements GPIOSysVInterface
         // TODO: Implement log() method.
     }
 
+    /*****
+     * Section copied verbatim from PiPHP:GPIO
+     */
     /**
      * {@inheritdoc}
      */
