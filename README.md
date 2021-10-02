@@ -1,4 +1,4 @@
-# PiPHP: GPIO
+# PiPHP: GPIOSysV
 
 [![License](https://poser.pugx.org/piphp/gpio/license)](https://packagist.org/packages/piphp/gpio)
 [![Total Downloads](https://poser.pugx.org/piphp/gpio/downloads)](https://packagist.org/packages/laxamar/gpiosysv)
