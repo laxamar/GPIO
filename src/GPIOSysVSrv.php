@@ -32,24 +32,27 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     function process_queue()
     {
-        $seg      = msg_get_queue(GPIOSysVInterface::MSG_QUEUE_ID);
+        $seg      = msg_get_queue(self::MSG_QUEUE_ID);
         $msg_type = GPIOSysVInterface::MSG_TYPE_GPIO;
         $data     = null;
         $error_code = null;
+        $success  = true;
+        $debug    = null;
         
         while ($this->still_running)
         {
             $stat = msg_stat_queue($seg);
             if ($this->debug) echo 'Messages in the queue: ' . $stat['msg_qnum'] . "\n";
             if ($stat['msg_qnum'] > 0) {
-                msg_receive($seg, MSG_TYPE_GPIO, $msg_type, MSG_MAX_SIZE, $data, true, 0, $error_code);
+                msg_receive($seg, self::MSG_TYPE_GPIO, $msg_type, self::MSG_MAX_SIZE,
+                    $data, true, 0, $error_code);
                 // check for errors
                 if (!empty($error_code))
                 {
-                    $this->log('Error code :'.$error_code);
+                    $this->log('Error code :'.$error_code, $data);
                     continue;
                 }
-                if ($msg_type != MSG_TYPE_GPIO)
+                if ($msg_type != self::MSG_TYPE_GPIO)
                 {
                     $this->log('Received wrong message type '.$msg_type, $data);
                     continue;
@@ -62,65 +65,128 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 $function_call = $data['function'];
                 // Dispatch the message
 
+                $debug = null; // need a placeholder
+                $error_code = null; // need a variable
+                $success    = true;
                 switch ( $function_call )
                 {
                     case 'set_pin':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        $this->set_pin($pin_id);
+                        if (empty($pin_id)) {
+                            $success = false;
+                            $this->log($function_call.' with empty pin_id', $data);
+                            break;
+                        }
+                        $success &= $this->set_pin($pin_id, $error_code);
                         break;
                     case 'clear_pin':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        $this->clear_pin($pin_id);
+                        if (empty($pin_id)) {
+                            $success = false;
+                            $this->log($function_call.' with empty pin_id', $data);
+                            break;
+                        }
+                        $success &= $this->clear_pin($pin_id, $error_code);
                         break;
                     case 'get_pin ':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        $pin_status = $this->get_pin($pin_id);
-                        $this->msg_back($data, ['return' => $pin_status]);
+                        $pin_status = $this->get_pin($pin_id, $error_code);
+                        $this->msg_back($data, ['pin_status' => $pin_status], $error_code);
                         break;
                     case 'all_clear':
                         $pin_array = $data['parms']['pin_array'] ?? [];
-                        if (!empty($pin_array)) {
-                            $this->all_clear($pin_array);
-                        } else {
-                            $this->log('all_clear with empty array', $data);
+                        if (empty($pin_array)) {
+                            $success = false;
+                            $this->log($function_call. ' with empty array', $data);
+                            break;
                         }
+                        $success &= $this->all_clear($pin_array, $error_code);
                         break;
                     case 'set_binary':
                         $dec_value = $data['parms']['dec_value'] ?? null;
                         $pin_array = $data['parms']['pin_array'] ?? [];
-                        if (!is_null($dec_value) && !empty($pin_array))
+                        if (is_null($dec_value) || empty($pin_array))
                         {
-                            $this->set_binary($dec_value, $pin_array);
-                        } else {
-                            $this->log('set_binary with empty values', $data);
+                            $success = false;
+                            $this->log($function_call. ' with empty values', $data);
+                            break;
                         }
+                        $success &= $this->set_binary($dec_value, $pin_array, $debug, $error_code);
                         break;
                     case 'flash_binary':
-                        $dec_value = $data['parms']['dec_value'] ?? null;
-                        $pin_array = $data['parms']['pin_array'] ?? [];
-                        if (!is_null($dec_value) && !empty($pin_array))
+                        $dec_value  = $data['parms']['value'] ?? null;
+                        $pin_array  = $data['parms']['pin_array'] ?? [];
+                        $select_pin = $data['parms']['select_pin'] ?? null;
+                        if (is_null($dec_value) || empty($pin_array) || empty($select_pin))
                         {
-                            $this->flash_binary($dec_value, $pin_array);
-                        } else {
-                            $this->log('flash_binary with empty values', $data);
+                            $success = false;
+                            $this->log($function_call. ' with empty values', $data);
+                            break;
                         }
+                        $success &= $this->flash_binary($dec_value, $pin_array, $select_pin, $debug, $error_code);
                         break;
                     case 'blip_binary':
-
+                        $dec_value  = $data['parms']['value'] ?? null;
+                        $pin_array  = $data['parms']['pin_array'] ?? [];
+                        $toggle_pin = $data['parms']['toggle_pin'] ?? null;
+                        $count      = $data['parms']['count'] ?? null;
+                        $empty      = $data['parms']['empty'] ?? null;
+                        $period     = $data['parms']['period'] ?? null;
+                        if (is_null($dec_value) || empty($pin_array) || empty($toggle_pin))
+                        {
+                            $success = false;
+                            $this->log($function_call. ' with empty values', $data);
+                            break;
+                        }
+                        $success &= $this->blip_binary($dec_value, $pin_array, $toggle_pin, $count, $empty, $period, $debug, $error_code);
                         break;
                     case 'flash_bit':
+                        $pin_id    = $data['parms']['pin_id'] ?? null;
+                        $count     = $data['parms']['count'] ?? null;
+                        $on_delay  = $data['parms']['on_delay'] ?? null;
+                        $off_delay = $data['parms']['off_delay'] ?? null;
+                        if (empty($pin_id)) {
+                            $success = false;
+                            $this->log($function_call.' with empty pin_id', $data);
+                            break;
+                        }
+                        $success &= $this->flash_pin($pin_id, $count, $on_delay, $off_delay, $error_code);
 
                         break;
                     default:
                         // Log error
+                        $success = false;
                         $this->log('Received non existent function call type '.$function_call, $data);
-                        continue;
-
                         break;
+                }
+                if (!$success)
+                {
+                    // TODO: Do something?
                 }
             }
         }
     }
+
+    /**
+     * Dispatch a data block through SysV to a server
+     * @param array $data to be passed to server
+     * @param null $error_code msg_send error code if any
+     * @return bool
+     */
+    protected function msg_back(array $data, array $response, &$error_code = null) : bool
+    {
+        $seg      = msg_get_queue($data['msg_queue_id']);
+        $msg_type = $data['msg_type'];
+        $response_error = null;
+        $dispatch_success = msg_send($seg, $msg_type, $response, true, true, $response_error_error);
+        if (!$dispatch_success || !empty($response_error))
+        {
+            $error_code .= $response_error;
+            $this->log('Sending MSG back error: '.$error_code, $data);
+        }
+        return $dispatch_success;
+    }
+
 
     /**
      *  {@inheritdoc}
@@ -144,7 +210,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function get_pin($pin_id, &$error_code = null) : bool
+    function get_pin($pin_id, &$error_code = null) : ?int
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         return $pin->getValue();
@@ -189,10 +255,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param null $toggle_pin
      * @param false $debug
      */
-    function flash_binary($value = null, $pin_array = [], $toggle_pin = null, $debug=false, string &$error_code=null) : bool
+    function flash_binary(int $value, array $pin_array, int $select_pin, ?bool $debug=false, ?string &$error_code=null) : bool
     {
+        $success = true;
         // set pin to turn off output
-        $this->clear_pin($toggle_pin);
+        $success &= $this->clear_pin($select_pin, $error_code);
         // Calculate binary pins
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
@@ -200,25 +267,27 @@ class GPIOSysVSrv implements GPIOSysVInterface
         for ($pos=0;$pos < $bits; $pos++) {
             // foreach ($binary as $pos => $bit)
             if ($binary[$pos] == 1) {
-                $this->set_pin($pin_array[$bits-$pos-1]);
+                $success &= $this->set_pin($pin_array[$bits-$pos-1], $error_code);
             } else {
-                $this->clear_pin($pin_array[$bits-$pos-1]);
+                $success &= $this->clear_pin($pin_array[$bits-$pos-1], $error_code);
             }
         }
-        return $this->flash_bit($toggle_pin, $error_code);
+        return $this->flash_bit($select_pin, $error_code);
     }
 
     /**
-     * @param null $value
+     * @param int|null $value
      * @param array $pin_array
-     * @param null $toggle_pin
-     * @param int $count
-     * @param int $empty
-     * @param int $period
+     * @param int|null $toggle_pin
+     * @param int|null $count
+     * @param int|null $empty
+     * @param int|null $period
      * @param false $debug
+     * @param string|null $error_code
+     * @return bool
      */
-    function blip_binary($value = null, $pin_array = [], $toggle_pin = null, $count=1, $empty=0, $period=1000000,
-                         $debug=false, string &$error_code=null) : bool
+    function blip_binary(int $value = null, array $pin_array = [], int $toggle_pin = null, ?int $count=1, ?int $empty=0, ? int $period=1000000,
+                         ?bool $debug=false, ?string &$error_code=null) : bool
     {
         // set pin to turn off output
         $this->clear_pin($toggle_pin);
@@ -245,11 +314,13 @@ class GPIOSysVSrv implements GPIOSysVInterface
      *    loop $count time
      *        turn on - wait $on_dalay - turn off - wait $off_delay
      * @param int $pin_id
-     * @param int $count number of times to flash
-     * @param int $on_delay in useconds
-     * @param int $off_delay in useconds
+     * @param int|null $count number of times to flash
+     * @param int|null $on_delay in useconds
+     * @param int|null $off_delay in useconds
+     * @param string|null $error_code
+     * @return bool
      */
-    function flash_bit($pin_id, $count = 1, $on_delay = 50000, $off_delay = 50000, string &$error_code=null) : bool
+    function flash_bit(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool
     {
         $return_status = true;
         for ($seq=1; $seq <= $count; $seq++)
@@ -267,7 +338,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param $message text to be logged
      * @param null $data option $data array passed as a parameter through SysV
      */
-    private function log(text $message, ?bool $data = null)
+    private function log(string $message, ?bool $data = null)
     {
         // TODO: Implement log() method.
     }

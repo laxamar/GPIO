@@ -61,7 +61,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function clear_pin($pin_id, &$error_code = null) : bool
+    public function clear_pin(int $pin_id, &$error_code = null) : bool
     {
         $data = [
             'function' => 'set_pin',
@@ -72,10 +72,43 @@ class GPIOSysVClt implements GPIOSysVInterface
         return $this->dispatch($data, $error_code);
     }
 
-    public function get_pin(int $pin_id, &$error_code=null) : bool
+    public function get_pin(int $pin_id, &$error_code=null) : ?int
     {
-        // TODO: implement
-        return $pin_id;
+        $msg_queue_id = self::MSG_BACK_ID;
+        $msg_type_back = self::MSG_BACK_GPIO; // TODO: add a unique number
+
+        $data = [
+            'function' => 'get_pin',
+            'parms' => [
+                'pin_id' => $pin_id,
+                'msg_queue_id' => $msg_queue_id,
+                'msg_type' => $msg_type_back,
+            ]
+        ];
+        $this->dispatch($data, $error_code);
+        // Now wait for the answer (OMG)
+        $seg = msg_get_queue($msg_queue_id);
+        $stat = msg_stat_queue($seg);
+        // TODO: Loop and Wait a reasonable amount of time before reading
+        if ($stat['msg_qnum'] > 0) {
+            msg_receive($seg, $msg_type_back, $msg_type, self::MSG_MAX_SIZE,
+                $response, true, 0, $error_code);
+            // check for errors
+            if (!empty($error_code)) {
+                $this->log('Error code :' . $error_code, $data);
+            }
+            if ($msg_type != $msg_type_back) {
+                $this->log('Received wrong message type back instead of expected ' . $msg_type_back . ' we got :' . $msg_type, $data);
+            }
+            if (is_null($data)) {
+                $this->log('Empty receive:', $data);
+            }
+            return $data['pin_status'] ?? null;
+        } else {
+            $error_code .= '9999';
+            return null;
+        }
+
     }
 
     public function all_clear($pin_array, &$error_code=null) : bool
@@ -105,19 +138,21 @@ class GPIOSysVClt implements GPIOSysVInterface
     }
 
     /**
-     * @param int $value
+     * @param int|null $value
      * @param array $pin_array
-     * @param null $toggle_pin
+     * @param int|null $toggle_pin
      * @param false $debug
+     * @param null $error_code
+     * @return bool
      */
-    function flash_binary(int $value = null, array $pin_array = [], int $toggle_pin = null, ?bool $debug=false, &$error_code = null) : bool
+    function flash_binary(int $value = null, array $pin_array = [], int $select_pin = null, ?bool $debug=false, &$error_code = null) : bool
     {
         $data = [
             'function' => 'flash_binary',
             'parms'    => [
                 'value'      => $value,
                 'pin_array'  => $pin_array,
-                'toggle_pin' => $toggle_pin
+                'select_pin' => $select_pin
             ]
         ];
         return $this->dispatch($data, $error_code);
