@@ -1,6 +1,6 @@
 <?php
 
-namespace laxamar\GPIOSysV;
+namespace Amar\GPIOSysV;
 
 use PiPHP\GPIO\Interrupt\InterruptWatcher;
 use PiPHP\GPIO\Pin\InputPin;
@@ -21,7 +21,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
             $this_class = get_called_class();
             $_local_obj = new $this_class();
 
-            $_local_obj->gpio_obj = new GPIO();
+            $_local_obj->gpio_obj = new \PiPHP\GPIO\GPIO();
 
             self::$instance = $_local_obj;
         }
@@ -196,7 +196,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     function set_pin($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        $pin->setValue(PinInterface::VALUE_HIGH);
+        $pin->setValue(\PiPHP\GPIO\PinInterface::VALUE_HIGH);
         return true;
     }
 
@@ -206,7 +206,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     function clear_pin($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        return $pin->setValue(PinInterface::VALUE_LOW);
+        return $pin->setValue(\PiPHP\GPIO\PinInterface::VALUE_LOW);
     }
 
     /**
@@ -361,7 +361,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     public function getInputPin($number)
     {
-        return new InputPin($this->fileSystem, $number);
+        return new InputPin($this->gpio_obj->fileSystem, $number);
     }
 
     /**
@@ -373,7 +373,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
             throw new \InvalidArgumentException('exportDirection has to be an OUT type (OUT/LOW/HIGH).');
         }
 
-        return new OutputPin($this->fileSystem, $number, $exportDirection);
+        return new OutputPin($this->gpio_obj->fileSystem, $number, $exportDirection);
     }
 
     /**
@@ -381,6 +381,6 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     public function createWatcher()
     {
-        return new InterruptWatcher($this->fileSystem, $this->streamSelect);
+        return new InterruptWatcher($this->gpio_obj->fileSystem, $this->gpio_obj->streamSelect);
     }
 }

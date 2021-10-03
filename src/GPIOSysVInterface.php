@@ -1,5 +1,5 @@
 <?php
-namespace laxamar\GPIOSysV;
+namespace Amar\GPIOSysV;
 
 // use PiPHP\GPIO\FileSystem\FileSystem;
 // use PiPHP\GPIO\FileSystem\FileSystemInterface;
@@ -19,7 +19,7 @@ namespace laxamar\GPIOSysV;
  * @copyright (c) 2021	Amar Micro Inc.
  * @version	0.1
  */
-interface GPIOSysVInterface extends GPIOInterface
+interface GPIOSysVInterface extends \PiPHP\GPIO\GPIOInterface
 {
     const MSG_QUEUE_ID = '26274746';
     const MSG_BACK_ID  = '47462627';

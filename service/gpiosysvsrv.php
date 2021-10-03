@@ -4,9 +4,9 @@
  *
  */
 
-namespace laxamar\GPIOSysV;
+namespace Amar\GPIOSysV;
 
-// use laxamar\GPIOSysV\GPIOSysVSrv;
+// use Amar\GPIOSysV\GPIOSysVSrv;
 
 define('PID_FILE', "/var/run/" . basename($argv[0], ".php") . ".pid");
 

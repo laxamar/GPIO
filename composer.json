@@ -5,17 +5,13 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Andrew Carter",
-            "email": "andrewcarter1992@gmail.com"
-        },
-        {
             "name": "Jacques Amar",
             "email": "jx.gpiosysv@amar.com"
         }
     ],
     "autoload": {
         "psr-4": {
-            "PiPHP\\GPIO\\": "src/"
+            "Amar\\GPIOSysV\\": "src/"
         }
     },
     "autoload-dev": {
@@ -24,7 +20,9 @@
         }
     },
     "require": {
-        "php": "^7.3||^8.0"
+        "php": "^7.3||^8.0",
+        "piphp/gpio": "*",
+        'ext-sysvmsg': "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3"

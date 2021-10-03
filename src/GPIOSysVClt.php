@@ -1,12 +1,12 @@
 <?php
 
-namespace laxamar\GPIOSysV;
+namespace Amar\GPIOSysV;
 
-use PiPHP\GPIO\Interrupt\InterruptWatcher;
-use PiPHP\GPIO\Pin\InputPin;
-use PiPHP\GPIO\Pin\OutputPin;
-use PiPHP\GPIO\Pin\Pin;
-use PiPHP\GPIO\GPIO;
+// use PiPHP\GPIO\Interrupt\InterruptWatcher;
+// use PiPHP\GPIO\Pin\InputPin;
+// use PiPHP\GPIO\Pin\OutputPin;
+// use PiPHP\GPIO\Pin\Pin;
+// use PiPHP\GPIO\GPIO;
 
 class GPIOSysVClt implements GPIOSysVInterface
 {
