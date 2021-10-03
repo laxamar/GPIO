@@ -100,7 +100,7 @@ class GPIOSysVClt implements GPIOSysVInterface
             if ($msg_type != $msg_type_back) {
                 $this->log('Received wrong message type back instead of expected ' . $msg_type_back . ' we got :' . $msg_type, $data);
             }
-            if (is_null($data)) {
+            if (is_null($response)) {
                 $this->log('Empty receive:', $data);
             }
             return $data['pin_status'] ?? null;
@@ -140,12 +140,12 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * @param int|null $value
      * @param array $pin_array
-     * @param int|null $toggle_pin
+     * @param int|null $select_pin
      * @param false $debug
      * @param null $error_code
      * @return bool
      */
-    function flash_binary(int $value = null, array $pin_array = [], int $select_pin = null, ?bool $debug=false, &$error_code = null) : bool
+    function flash_binary(int $value, array $pin_array, int $select_pin, ?bool $debug=false, &$error_code = null) : bool
     {
         $data = [
             'function' => 'flash_binary',
@@ -159,22 +159,24 @@ class GPIOSysVClt implements GPIOSysVInterface
     }
 
     /**
-     * @param null $value
+     * @param int $value
      * @param array $pin_array
-     * @param null $toggle_pin
-     * @param int $count
-     * @param int $empty
-     * @param int $period
+     * @param int $select_pin
+     * @param int|null $count
+     * @param int|null $empty
+     * @param int|null $period
      * @param false $debug
+     * @param null $error_code
+     * @return bool
      */
-    function blip_binary($value = null, $pin_array = [], $toggle_pin = null, $count=1, $empty=0, $period=1000000, $debug=false, &$error_code=null) : bool
+    function blip_binary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ?int $period=1000000, ?bool $debug=false, &$error_code=null) : bool
     {
         $data = [
             'function' => 'blip_binary',
             'parms'    => [
                 'value'      => $value,
                 'pin_array'  => $pin_array,
-                'toggle_pin' => $toggle_pin,
+                'select_pin' => $select_pin,
                 'count'      => $count,
                 'empty'      => $empty,
                 'period'     => $period
@@ -188,9 +190,11 @@ class GPIOSysVClt implements GPIOSysVInterface
      *    loop $count time
      *        turn on - wait $on_dalay - turn off - wait $off_delay
      * @param int $pin_id
-     * @param int $count number of times to flash
-     * @param int $on_delay in useconds
-     * @param int $off_delay in useconds
+     * @param int|null $count number of times to flash
+     * @param int|null $on_delay in useconds
+     * @param int|null $off_delay in useconds
+     * @param string|null $error_code
+     * @return bool
      */
     public function flash_bit(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : bool
     {
@@ -205,10 +209,10 @@ class GPIOSysVClt implements GPIOSysVInterface
 
     /**
      * log error or status to a file
-     * @param $message - to be logged
-     * @param null $data - option $data array passed as a parameter through SysV
+     * @param string $message - to be logged
+     * @param array|null $data - option $data array passed as a parameter through SysV
      */
-    private function log(string $message, ?bool $data = null)
+    private function log(string $message, ?array $data = null)
     {
         // TODO: Implement log() method.
     }
