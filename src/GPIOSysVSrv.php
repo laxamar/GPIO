@@ -34,7 +34,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     public function process_queue()
     {
         $seg      = msg_get_queue(self::MSG_QUEUE_ID);
-        $msg_type = GPIOSysVInterface::MSG_TYPE_GPIO;
+        $msg_type = self::MSG_TYPE_GPIO;
         $data     = null;
         $error_code = null;
         $success  = true;
@@ -334,6 +334,13 @@ class GPIOSysVSrv implements GPIOSysVInterface
             usleep($off_delay);
         }
         return $return_status;
+    }
+
+
+    public function cleanMsgQueue()
+    {
+        $seg      = msg_get_queue(self::MSG_QUEUE_ID);
+        msg_remove_queue($seg);
     }
 
     /**

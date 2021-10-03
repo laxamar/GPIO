@@ -6,7 +6,7 @@
 
 namespace laxamar\GPIOSysV;
 
-use laxamar\GPIOSysV\GPIOSysVSrv;
+// use laxamar\GPIOSysV\GPIOSysVSrv;
 
 define('PID_FILE', "/var/run/" . basename($argv[0], ".php") . ".pid");
 
@@ -23,7 +23,6 @@ pcntl_signal(SIGTERM, "sig_handler");
 pcntl_signal(SIGHUP,  "sig_handler");
 pcntl_signal(SIGUSR1, "sig_handler");
 
-$loopit = true;
 $gpio_obj = GPIOSysVSrv::getInstance();
 $gpio_obj->still_running = true;
 while ($gpio_obj->still_running) {
@@ -72,20 +71,19 @@ function tryPidLock() : ?string
  * signal handler function
  * Not all are implemented
  */
-function sig_handler($signo, $siginfo)
-{
-    echo "Interrupt $signo :".print_r($siginfo,1);
+function sig_handler(int $signo, $siginfo) : void {
+    echo "Interrupt $signo :" . print_r($siginfo, 1);
     $gpio_obj = GPIOSysVSrv::getInstance(); // let's get the same instance
     switch ($signo) {
         case SIGTERM:
             // handle shutdown tasks
             $gpio_obj->still_running = false;
-            // leds_off();
+            $gpio_obj->cleanMsgQueues();
             exit;
-            break;
         case SIGHUP:
             // handle restart tasks
-            $gpio_obj->still_running = false;
+            $gpio_obj->still_running = true;
+            $gpio_obj->cleanMsgQueues();
             break;
         case SIGUSR1:
             echo "Caught SIGUSR1...\n";
@@ -96,4 +94,3 @@ function sig_handler($signo, $siginfo)
     }
 
 }
-
