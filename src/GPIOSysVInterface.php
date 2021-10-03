@@ -1,5 +1,5 @@
 <?php
-namespace PiPHP\GPIO;
+namespace laxamar\GPIOSysV;
 
 // use PiPHP\GPIO\FileSystem\FileSystem;
 // use PiPHP\GPIO\FileSystem\FileSystemInterface;

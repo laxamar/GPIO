@@ -1,6 +1,6 @@
 <?php
 
-namespace PiPHP\GPIO;
+namespace laxamar\GPIOSysV;
 
 use PiPHP\GPIO\Interrupt\InterruptWatcher;
 use PiPHP\GPIO\Pin\InputPin;

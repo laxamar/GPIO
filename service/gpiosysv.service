@@ -1,0 +1,16 @@
+[Unit]
+Description=GPIO SysV Server
+After=syslog.target network.target
+
+[Service]
+Type=forking
+RemainAfterExit=yes
+EnvironmentFile=/etc/laxfw/firewall.conf
+WorkingDirectory=/usr/local/laxfw
+ExecStart=/usr/local/gpiosysv/gpiosysvsrv.sh start
+ExecStop=/usr/local/gpiosysv/gpiosysvsrv.sh stop
+ExecReload=/usr/local/gpiosysv/gpiosysvsrv.sh restart
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -1,6 +1,6 @@
 <?php
 
-namespace PiPHP\GPIO;
+namespace laxamar\GPIOSysV;
 
 use PiPHP\GPIO\Interrupt\InterruptWatcher;
 use PiPHP\GPIO\Pin\InputPin;
@@ -12,6 +12,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     static private $instance;
     private $gpio_obj;
     private $debug;
+    public  $still_running;
 
     static public function getInstance()
     {
