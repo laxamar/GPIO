@@ -2,7 +2,7 @@
 
 namespace Amar\GPIOSysV;
 
-use PiPHP\GPIO\Interrupt\InterruptWatcher;
+// use PiPHP\GPIO\Interrupt\InterruptWatcher;
 use PiPHP\GPIO\Pin\InputPin;
 use PiPHP\GPIO\Pin\OutputPin;
 use PiPHP\GPIO\Pin\Pin;
@@ -14,6 +14,10 @@ class GPIOSysVSrv implements GPIOSysVInterface
     private $debug;
     public  $still_running;
 
+    /**
+     * Singleton object to handle all pins
+     * @return mixed
+     */
     static public function getInstance()
     {
         if( !isset( self::$instance ) )
@@ -37,13 +41,12 @@ class GPIOSysVSrv implements GPIOSysVInterface
         $msg_type = self::MSG_TYPE_GPIO;
         $data     = null;
         $error_code = null;
-        $success  = true;
-        $debug    = null;
-        
+        $success    = true; // re-initialized inside loop
+
         while ($this->still_running)
         {
             $stat = msg_stat_queue($seg);
-            if ($this->debug) echo 'Messages in the queue: ' . $stat['msg_qnum'] . "\n";
+            if ($this->debug) $this->log( 'Messages in the msg_queue: ' . $stat['msg_qnum'] );
             if ($stat['msg_qnum'] > 0) {
                 msg_receive($seg, self::MSG_TYPE_GPIO, $msg_type, self::MSG_MAX_SIZE,
                     $data, true, 0, $error_code);
@@ -66,44 +69,52 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 $function_call = $data['function'];
                 // Dispatch the message
 
-                $debug = null; // need a placeholder
                 $error_code = null; // need a variable
                 $success    = true;
                 switch ( $function_call )
                 {
-                    case 'set_pin':
+                    case 'setPinHigh':
                         $pin_id = $data['parms']['pin_id'] ?? null;
                         if (empty($pin_id)) {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
                         }
-                        $success &= $this->set_pin($pin_id, $error_code);
+                        $success &= $this->setPinHigh($pin_id, $error_code);
                         break;
-                    case 'clear_pin':
+                    case 'setPinLow':
                         $pin_id = $data['parms']['pin_id'] ?? null;
                         if (empty($pin_id)) {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
                         }
-                        $success &= $this->clear_pin($pin_id, $error_code);
+                        $success &= $this->setPinLow($pin_id, $error_code);
                         break;
-                    case 'get_pin ':
+                    case 'getPin':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        $pin_status = $this->get_pin($pin_id, $error_code);
+                        $pin_status = $this->getPin($pin_id, $error_code);
                         $this->msg_back($data, ['pin_status' => $pin_status], $error_code);
                         break;
-                    case 'all_clear':
+                    case 'setArrayLow':
                         $pin_array = $data['parms']['pin_array'] ?? [];
                         if (empty($pin_array)) {
                             $success = false;
                             $this->log($function_call. ' with empty array', $data);
                             break;
                         }
-                        $success &= $this->all_clear($pin_array, $error_code);
+                        $success &= $this->setArrayLow($pin_array, $error_code);
                         break;
-                    case 'set_binary':
+                    case 'setArrayHigh':
+                        $pin_array = $data['parms']['pin_array'] ?? [];
+                        if (empty($pin_array)) {
+                            $success = false;
+                            $this->log($function_call. ' with empty array', $data);
+                            break;
+                        }
+                        $success &= $this->setArrayHigh($pin_array, $error_code);
+                        break;
+                    case 'setPinsBinary':
                         $dec_value = $data['parms']['dec_value'] ?? null;
                         $pin_array = $data['parms']['pin_array'] ?? [];
                         if (is_null($dec_value) || empty($pin_array))
@@ -112,9 +123,9 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $this->log($function_call. ' with empty values', $data);
                             break;
                         }
-                        $success &= $this->set_binary($dec_value, $pin_array, $debug, $error_code);
+                        $success &= $this->setPinsBinary($dec_value, $pin_array, $error_code);
                         break;
-                    case 'flash_binary':
+                    case 'flashBinary':
                         $dec_value  = $data['parms']['value'] ?? null;
                         $pin_array  = $data['parms']['pin_array'] ?? [];
                         $select_pin = $data['parms']['select_pin'] ?? null;
@@ -124,9 +135,9 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $this->log($function_call. ' with empty values', $data);
                             break;
                         }
-                        $success &= $this->flash_binary($dec_value, $pin_array, $select_pin, $debug, $error_code);
+                        $success &= $this->flashBinary($dec_value, $pin_array, $select_pin, $error_code);
                         break;
-                    case 'blip_binary':
+                    case 'strobeBinary':
                         $dec_value  = $data['parms']['value'] ?? null;
                         $pin_array  = $data['parms']['pin_array'] ?? [];
                         $select_pin = $data['parms']['select_pin'] ?? null;
@@ -139,9 +150,9 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $this->log($function_call. ' with empty values', $data);
                             break;
                         }
-                        $success &= $this->blip_binary($dec_value, $pin_array, $select_pin, $count, $empty, $period, $debug, $error_code);
+                        $success &= $this->strobeBinary($dec_value, $pin_array, $select_pin, $count, $empty, $period, $error_code);
                         break;
-                    case 'flash_bit':
+                    case 'flashPinHighLow':
                         $pin_id    = $data['parms']['pin_id'] ?? null;
                         $count     = $data['parms']['count'] ?? null;
                         $on_delay  = $data['parms']['on_delay'] ?? null;
@@ -151,7 +162,20 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
                         }
-                        $success &= $this->flash_bit($pin_id, $count, $on_delay, $off_delay, $error_code);
+                        $success &= $this->flashPinHighLow($pin_id, $count, $on_delay, $off_delay, $error_code);
+
+                        break;
+                    case 'flashPinLowHigh':
+                        $pin_id    = $data['parms']['pin_id'] ?? null;
+                        $count     = $data['parms']['count'] ?? null;
+                        $on_delay  = $data['parms']['on_delay'] ?? null;
+                        $off_delay = $data['parms']['off_delay'] ?? null;
+                        if (empty($pin_id)) {
+                            $success = false;
+                            $this->log($function_call.' with empty pin_id', $data);
+                            break;
+                        }
+                        $success &= $this->flashPinLowHigh($pin_id, $count, $on_delay, $off_delay, $error_code);
 
                         break;
                     default:
@@ -193,7 +217,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function set_pin($pin_id, &$error_code = null) : bool
+    function setPinHigh($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         $pin->setValue(\PiPHP\GPIO\PinInterface::VALUE_HIGH);
@@ -203,7 +227,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function clear_pin($pin_id, &$error_code = null) : bool
+    function setPinLow($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         return $pin->setValue(\PiPHP\GPIO\PinInterface::VALUE_LOW);
@@ -212,7 +236,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function get_pin($pin_id, &$error_code = null) : ?int
+    function getPin($pin_id, &$error_code = null) : ?int
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         return $pin->getValue();
@@ -221,10 +245,21 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function all_clear($pin_array, &$error_code = null) : bool
+    function setArrayLow($pin_array, &$error_code = null) : bool
     {
         foreach ($pin_array as $pin_id) {
-            $this->clear_pin($pin_id);
+            $this->setPinLow($pin_id);
+        }
+        return true;
+    }
+
+    /**
+     *  {@inheritdoc}
+     */
+    function setArrayHigh($pin_array, &$error_code = null) : bool
+    {
+        foreach ($pin_array as $pin_id) {
+            $this->setPinHigh($pin_id);
         }
         return true;
     }
@@ -232,19 +267,19 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    function set_binary($value, $pin_array, $debug=false, string &$error_code=null) : bool
+    function setPinsBinary($value, $pin_array, string &$error_code=null) : bool
     {
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
-        if ($debug) $this->log($value . ' => '. print_r($binary,1));
+        if ($this->debug) $this->log($value . ' => '. print_r($binary,1));
         // $this->all_off($PIN_ARRAY);
         $return_status = true;
         for ($pos=0;$pos < $bits; $pos++) {
             // foreach ($binary as $pos => $bit)
             if ($binary[$pos] == 1) {
-                $return_status &= $this->set_pin($pin_array[$bits-$pos-1], $error_code);
+                $return_status &= $this->setPinHigh($pin_array[$bits-$pos-1], $error_code);
             } else {
-                $return_status &= $this->clear_pin($pin_array[$bits-$pos-1], $error_code);
+                $return_status &= $this->setPinLow($pin_array[$bits-$pos-1], $error_code);
             }
         }
         return $return_status;
@@ -254,28 +289,27 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param int $value
      * @param array $pin_array
      * @param int $select_pin
-     * @param false $debug
      * @param string|null $error_code
      * @return bool
      */
-    function flash_binary(int $value, array $pin_array, int $select_pin, ?bool $debug=false, ?string &$error_code=null) : bool
+    function flashBinary(int $value, array $pin_array, int $select_pin, ?string &$error_code=null) : bool
     {
         $success = true;
         // set pin to turn off output
-        $success &= $this->clear_pin($select_pin, $error_code);
+        $success &= $this->setPinLow($select_pin, $error_code);
         // Calculate binary pins
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
-        if ($debug) $this->log('DEBUG: $binary'. print_r($binary,1) );
+        if ($this->debug) $this->log('DEBUG: $binary'. print_r($binary,1) );
         for ($pos=0;$pos < $bits; $pos++) {
             // foreach ($binary as $pos => $bit)
             if ($binary[$pos] == 1) {
-                $success &= $this->set_pin($pin_array[$bits-$pos-1], $error_code);
+                $success &= $this->setPinHigh($pin_array[$bits-$pos-1], $error_code);
             } else {
-                $success &= $this->clear_pin($pin_array[$bits-$pos-1], $error_code);
+                $success &= $this->setPinLow($pin_array[$bits-$pos-1], $error_code);
             }
         }
-        return $this->flash_bit($select_pin, $error_code);
+        return $this->flashPinHighLow($select_pin, $error_code);
     }
 
     /**
@@ -285,35 +319,34 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param int|null $count
      * @param int|null $empty
      * @param int|null $period
-     * @param false $debug
      * @param string|null $error_code
      * @return bool
      */
-    function blip_binary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ? int $period=1000000,
-                         ?bool $debug=false, ?string &$error_code=null) : bool
+    function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ? int $period=1000000,
+                         ?string &$error_code=null) : bool
     {
         // set pin to turn off output
-        $this->clear_pin($select_pin);
+        $this->setPinLow($select_pin);
         // Calculate binary pins
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
         for ($pos=0;$pos < $bits; $pos++) {
             // foreach ($binary as $pos => $bit)
             if ($binary[$pos] == 1) {
-                $this->set_pin($pin_array[$bits-$pos-1], $error_code);
+                $this->setPinHigh($pin_array[$bits-$pos-1], $error_code);
             } else {
-                $this->clear_pin($pin_array[$bits-$pos-1], $error_code);
+                $this->setPinLow($pin_array[$bits-$pos-1], $error_code);
             }
         }
         $delay = $period/($count+$empty);
-        if ($debug) $this->log('D:'.$delay.' '.$value . ' => '. print_r($binary,1));
-        return $this->flash_bit($select_pin, $count, $delay/2, $delay/2, $error_code);
+        if ($this->debug) $this->log('D:'.$delay.' '.$value . ' => '. print_r($binary,1));
+        return $this->flashPinHighLow($select_pin, $count, $delay/2, $delay/2, $error_code);
         // putting extra empty delay here??
         // usleep($empty * $delay);
     }
 
     /**
-     * flash_pin - Flash a pin instead of turning it on.
+     * flashPinHighLow - Flash a pin instead of turning it on.
      *    loop $count time
      *        turn on - wait $on_delay - turn off - wait $off_delay
      * @param int $pin_id
@@ -323,14 +356,38 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param string|null $error_code
      * @return bool
      */
-    function flash_bit(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool
+    function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool
     {
         $return_status = true;
         for ($seq=1; $seq <= $count; $seq++)
         {
-            $return_status &= $this->clear_pin($pin_id, $error_code);
+            $return_status &= $this->setPinHigh($pin_id, $error_code);
             usleep($on_delay);
-            $return_status &= $this->set_pin($pin_id, $error_code);
+            $return_status &= $this->setPinLow($pin_id, $error_code);
+            usleep($off_delay);
+        }
+        return $return_status;
+    }
+
+    /**
+     * flashPinLowHigh - Flash a pin Low then High instead of turning it on/off.
+     *    loop $count time
+     *        turn on - wait $on_delay - turn off - wait $off_delay
+     * @param int $pin_id
+     * @param int|null $count number of times to flash
+     * @param int|null $on_delay in useconds
+     * @param int|null $off_delay in useconds
+     * @param string|null $error_code
+     * @return bool
+     */
+    function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool
+    {
+        $return_status = true;
+        for ($seq=1; $seq <= $count; $seq++)
+        {
+            $return_status &= $this->setPinLow($pin_id, $error_code);
+            usleep($on_delay);
+            $return_status &= $this->setPinHigh($pin_id, $error_code);
             usleep($off_delay);
         }
         return $return_status;
@@ -353,34 +410,16 @@ class GPIOSysVSrv implements GPIOSysVInterface
         // TODO: Implement log() method.
     }
 
-    /*****
-     * Section copied verbatim from PiPHP:GPIO
-     */
     /**
-     * {@inheritdoc}
+     * set the global object $debug
+     * @param bool $set_debug
+     * @return bool
      */
-    public function getInputPin($number)
+    function setDebug(bool $set_debug) : bool
     {
-        return new InputPin($this->gpio_obj->fileSystem, $number);
+        $prev = $this->debug ?? false;
+        $this->debug = $set_debug;
+        return $prev;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getOutputPin($number, $exportDirection = Pin::DIRECTION_OUT)
-    {
-        if ($exportDirection !== Pin::DIRECTION_OUT && $exportDirection !== Pin::DIRECTION_LOW && $exportDirection !== Pin::DIRECTION_HIGH) {
-            throw new \InvalidArgumentException('exportDirection has to be an OUT type (OUT/LOW/HIGH).');
-        }
-
-        return new OutputPin($this->gpio_obj->fileSystem, $number, $exportDirection);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createWatcher()
-    {
-        return new InterruptWatcher($this->gpio_obj->fileSystem, $this->gpio_obj->streamSelect);
-    }
 }

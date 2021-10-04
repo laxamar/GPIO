@@ -1,14 +1,15 @@
-# PiPHP: GPIOSysV
+# Amar: GPIOSysV
 
 [![License](https://poser.pugx.org/piphp/gpio/license)](https://packagist.org/packages/piphp/gpio)
 [![Total Downloads](https://poser.pugx.org/laxamar/gpiosysv/downloads)](https://packagist.org/packages/laxamar/gpiosysv)
 
 A library for low level access to the GPIO pins on a Raspberry Pi. These pins can be used to control outputs (LEDs, motors, valves, pumps) or read inputs (sensors).
 
-By [AndrewCarterUK ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/AndrewCarterUK)
-
 Adapted by [laxamar ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/laxamar)
 ## Installing
+
+From [AndrewCarterUK ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/AndrewCarterUK)
+
 
 Using [composer](https://getcomposer.org/):
 
@@ -22,16 +23,15 @@ Or:
 
 ### Setting Output Pins
 ```php
-use PiPHP\GPIO\GPIOSysVSrv;
+use Amar\GPIOSysV\GPIOSysVClt;
 
 // Create a GPIO object
-$gpio = new GPIOSysVSrv();
-
-// Retrieve pin 18 and configure it as an output pin
-$pin = $gpio->getOutputPin(18);
+$gpio_obj = GPIOSysVClt::getInstance();
 
 // Set the value of the pin high (turn it on)
-$pin->setValue(PinInterface::VALUE_HIGH);
+$success = $gpio_obj->setPinHigh(18);
+
+$success = $gpio_obj->setPinLow(18);
 ```
 
 ### Input Pin Interrupts

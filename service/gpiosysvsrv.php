@@ -71,10 +71,10 @@ function tryPidLock() : ?string
  * signal handler function
  * Not all are implemented
  */
-function sig_handler(int $signo, $siginfo) : void {
-    echo "Interrupt $signo :" . print_r($siginfo, 1);
+function sig_handler(int $sigNo, array $sigInfo) : void {
+    echo "Interrupt $sigNo :" . print_r($sigInfo, 1);
     $gpio_obj = GPIOSysVSrv::getInstance(); // let's get the same instance
-    switch ($signo) {
+    switch ($sigNo) {
         case SIGTERM:
             // handle shutdown tasks
             $gpio_obj->still_running = false;

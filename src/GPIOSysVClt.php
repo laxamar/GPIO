@@ -47,10 +47,10 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function set_pin(int $pin_id, &$error_code = null) :bool
+    public function setPinHigh(int $pin_id, &$error_code = null) :bool
     {
         $data = [
-            'function' => 'set_pin',
+            'function' => 'setPinHigh',
             'parms'    => [
                 'pin_id' => $pin_id
             ]
@@ -61,10 +61,10 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function clear_pin(int $pin_id, &$error_code = null) : bool
+    public function setPinLow(int $pin_id, &$error_code = null) : bool
     {
         $data = [
-            'function' => 'set_pin',
+            'function' => 'setPinLow',
             'parms'    => [
                 'pin_id' => $pin_id
             ]
@@ -72,13 +72,13 @@ class GPIOSysVClt implements GPIOSysVInterface
         return $this->dispatch($data, $error_code);
     }
 
-    public function get_pin(int $pin_id, &$error_code=null) : ?int
+    public function getPin(int $pin_id, &$error_code=null) : ?int
     {
         $msg_queue_id = self::MSG_BACK_ID;
         $msg_type_back = self::MSG_BACK_GPIO; // TODO: add a unique number
 
         $data = [
-            'function' => 'get_pin',
+            'function' => 'getPin',
             'parms' => [
                 'pin_id' => $pin_id,
                 'msg_queue_id' => $msg_queue_id,
@@ -111,10 +111,13 @@ class GPIOSysVClt implements GPIOSysVInterface
 
     }
 
-    public function all_clear($pin_array, &$error_code=null) : bool
+    /**
+     * {@inheritdoc}
+     */
+    public function setArrayLow(array $pin_array, &$error_code=null) : bool
     {
         $data = [
-            'function' => 'set_pin',
+            'function' => 'setArrayLow',
             'parms'    => [
                 'pin_array' => $pin_array
             ]
@@ -125,10 +128,24 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    function set_binary($value, $pin_array, $debug=false, &$error_code=null) :bool
+    public function setArrayHigh(array $pin_array, &$error_code=null) : bool
     {
         $data = [
-            'function' => 'set_binary',
+            'function' => 'setArrayHigh',
+            'parms'    => [
+                'pin_array' => $pin_array
+            ]
+        ];
+        return $this->dispatch($data, $error_code);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    function setPinsBinary($value, $pin_array, &$error_code=null) :bool
+    {
+        $data = [
+            'function' => 'setPinsBinary',
             'parms'    => [
                 'value'     => $value,
                 'pin_array' => $pin_array
@@ -141,14 +158,13 @@ class GPIOSysVClt implements GPIOSysVInterface
      * @param int|null $value
      * @param array $pin_array
      * @param int|null $select_pin
-     * @param false $debug
      * @param null $error_code
      * @return bool
      */
-    function flash_binary(int $value, array $pin_array, int $select_pin, ?bool $debug=false, &$error_code = null) : bool
+    function flashBinary(int $value, array $pin_array, int $select_pin, &$error_code = null) : bool
     {
         $data = [
-            'function' => 'flash_binary',
+            'function' => 'flashBinary',
             'parms'    => [
                 'value'      => $value,
                 'pin_array'  => $pin_array,
@@ -165,14 +181,13 @@ class GPIOSysVClt implements GPIOSysVInterface
      * @param int|null $count
      * @param int|null $empty
      * @param int|null $period
-     * @param false $debug
      * @param null $error_code
      * @return bool
      */
-    function blip_binary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ?int $period=1000000, ?bool $debug=false, &$error_code=null) : bool
+    function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ?int $period=1000000, &$error_code=null) : bool
     {
         $data = [
-            'function' => 'blip_binary',
+            'function' => 'strobeBinary',
             'parms'    => [
                 'value'      => $value,
                 'pin_array'  => $pin_array,
@@ -196,12 +211,29 @@ class GPIOSysVClt implements GPIOSysVInterface
      * @param string|null $error_code
      * @return bool
      */
-    public function flash_bit(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : bool
+    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : bool
     {
         $data = [
-            'function' => 'flash_bit',
+            'function' => 'flashPinHighLow',
             'parms'    => [
-                'pin_id' => $pin_id
+                'pin_id'    => $pin_id,
+                'count'     => $count,
+                'on_delay'  => $on_delay,
+                'off_delay' => $off_delay
+            ]
+        ];
+        return $this->dispatch($data, $error_code);
+    }
+
+    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : bool
+    {
+        $data = [
+            'function' => 'flashPinLowHigh',
+            'parms'    => [
+                'pin_id'    => $pin_id,
+                'count'     => $count,
+                'on_delay'  => $on_delay,
+                'off_delay' => $off_delay
             ]
         ];
         return $this->dispatch($data, $error_code);
@@ -217,19 +249,16 @@ class GPIOSysVClt implements GPIOSysVInterface
         // TODO: Implement log() method.
     }
 
-    function getInputPin(int $number)
+    /**
+     * set the global object $debug
+     * @param bool $set_debug
+     * @return bool
+     */
+    function setDebug(bool $set_debug) : bool
     {
-        // TODO: Implement getInputPin() method.
-    }
-
-    function getOutputPin(int $number)
-    {
-        // TODO: Implement getOutputPin() method.
-    }
-
-    public function createWatcher()
-    {
-        // TODO: Implement createWatcher() method.
+        $prev = $this->debug ?? false;
+        $this->debug = $set_debug;
+        return $prev;
     }
 
 }

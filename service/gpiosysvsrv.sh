@@ -23,21 +23,21 @@ if [ -e $RUNFILE ]; then
 fi
 
 function panic() {
-  [ ! -z ${GPIOSYSVPID} ] && kill -SIGKILL ${GPIOSYSVPID}
+  [ -n "${GPIOSYSVPID}" ] && kill -SIGKILL ${GPIOSYSVPID}
   rm -y ${RUNFILE}
 }
 
 function stop() {
-  [ ! -z ${}GPIOSYSVPID} ] && kill -SIGTERM ${GPIOSYSVPID}
+  [ -n "${GPIOSYSVPID}" ] && kill -SIGTERM ${GPIOSYSVPID}
   kill -SIGTERM ${GPIOSYSVPID}
 }
 
 function start() {
-  ${php} ${codepath}gpiosysvsrv.php
+  ${PHP} ${CODEPATH}gpiosysvsrv.php
 }
 
 function status() {
-  if  [ ! -z "$GPIOSYSVPID" ]; then
+  if  [ -n "$GPIOSYSVPID" ]; then
     ps -q ${GPIOSYSVPID} -O comm=
   fi
 }
