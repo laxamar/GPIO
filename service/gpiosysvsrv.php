@@ -4,10 +4,11 @@
  *
  */
 
-namespace Amar\GPIOSysV;
+// namespace Amar\GPIOSysV;
 require 'vendor/autoload.php';
 
-use Amar\GPIOSysV\GPIOSysVSrv;
+// use Amar\GPIOSysV\GPIOSysVSrv;
+use GPIOSysVSrv;
 
 define('PID_FILE', "/var/run/" . basename($argv[0], ".php") . ".pid");
 
