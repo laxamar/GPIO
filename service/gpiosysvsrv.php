@@ -1,48 +1,19 @@
 <?php
 
 /**
- *
+ * gpiosysvsrv - SystemV Main Server loop that runs the process_queue
+ * @author Jacques Amar
+ * @copyright 2019-2021 Amar Micro Inc.
  */
 
-// namespace Amar\GPIOSysV;
 require 'vendor/autoload.php';
 
-// use Amar\GPIOSysV\GPIOSysVSrv;
-use GPIOSysVSrv;
+use Amar\GPIOSysV\GPIOSysVSrv;
 
 define('PID_FILE', "/var/run/" . basename($argv[0], ".php") . ".pid");
 
 if (!empty($pid_error = tryPidLock()))
     die($pid_error."\n");
-
-
-/**
- * signal handler function
- * Not all are implemented
- */
-function sig_handler (int $sigNo, $sigInfo) : int {
-    echo "Interrupt $sigNo :" . print_r($sigInfo, 1);
-    $gpio_obj = GPIOSysVSrv::getInstance(); // let's get the same instance
-    switch ($sigNo) {
-        case SIGTERM:
-            // handle shutdown tasks
-            $gpio_obj->still_running = false;
-            $gpio_obj->cleanMsgQueues();
-            exit;
-        case SIGHUP:
-            // handle restart tasks
-            $gpio_obj->still_running = true;
-            $gpio_obj->cleanMsgQueues();
-            break;
-        case SIGUSR1:
-            echo "Caught SIGUSR1...\n";
-            break;
-        default:
-            // handle all other signals
-            break;
-    }
-    return 0;
-}
 
 # remove the lock on exit (Control+C doesn't count as 'exit'?)
 register_shutdown_function('unlink', PID_FILE);
@@ -50,9 +21,9 @@ register_shutdown_function('unlink', PID_FILE);
 pcntl_async_signals(TRUE);
 
 // setup signal handlers
-pcntl_signal(SIGTERM, "sig_handler");
-pcntl_signal(SIGHUP,  "sig_handler");
-pcntl_signal(SIGUSR1, "sig_handler");
+pcntl_signal(SIGTERM, "sigHandler");
+pcntl_signal(SIGHUP,  "sigHandler");
+pcntl_signal(SIGUSR1, "sigHandler");
 
 $gpio_obj = GPIOSysVSrv::getInstance();
 $gpio_obj->still_running = true;
@@ -98,3 +69,30 @@ function tryPidLock() : ?string
     return 'Could not create PID file '.PID_FILE;
 }
 
+/**
+ * signal handler function
+ * Not all are implemented
+ */
+function sigHandler (int $sigNo, array $sigInfo) : int {
+    echo "Interrupt $sigNo :" . print_r($sigInfo, 1);
+    $gpio_obj = GPIOSysVSrv::getInstance(); // let's get the same instance
+    switch ($sigNo) {
+        case SIGTERM:
+            // handle shutdown tasks
+            $gpio_obj->still_running = false;
+            $gpio_obj->cleanMsgQueues();
+            exit;
+        case SIGHUP:
+            // handle restart tasks
+            $gpio_obj->still_running = true;
+            $gpio_obj->cleanMsgQueues();
+            break;
+        case SIGUSR1:
+            echo "Caught SIGUSR1...\n";
+            break;
+        default:
+            // handle all other signals
+            break;
+    }
+    return 0;
+}
