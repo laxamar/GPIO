@@ -1,0 +1,13 @@
+{
+    "require": {
+        "php": "^7.3||^8.0",
+        "piphp/gpio": "*",
+        "ext-sysvmsg": "*",
+        "ext-pcntl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Amar\\GPIOSysV\\": "src"
+        }
+    }
+}

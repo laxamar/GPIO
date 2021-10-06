@@ -5,7 +5,7 @@ After=syslog.target network.target
 [Service]
 Type=forking
 RemainAfterExit=yes
-EnvironmentFile=/etc/gpiosysv.d/gpiosysvsrv.conf
+# EnvironmentFile=/etc/gpiosysv.d/gpiosysvsrv.conf
 WorkingDirectory=/usr/local/gpiosysv
 ExecStart=/usr/local/gpiosysv/gpiosysvsrv.sh start
 ExecStop=/usr/local/gpiosysv/gpiosysvsrv.sh stop

@@ -5,13 +5,43 @@
  */
 
 namespace Amar\GPIOSysV;
+require 'vendor/autoload.php';
 
-// use Amar\GPIOSysV\GPIOSysVSrv;
+use Amar\GPIOSysV\GPIOSysVSrv;
 
 define('PID_FILE', "/var/run/" . basename($argv[0], ".php") . ".pid");
 
 if (!empty($pid_error = tryPidLock()))
     die($pid_error."\n");
+
+
+/**
+ * signal handler function
+ * Not all are implemented
+ */
+function sig_handler (int $sigNo, $sigInfo) : int {
+    echo "Interrupt $sigNo :" . print_r($sigInfo, 1);
+    $gpio_obj = GPIOSysVSrv::getInstance(); // let's get the same instance
+    switch ($sigNo) {
+        case SIGTERM:
+            // handle shutdown tasks
+            $gpio_obj->still_running = false;
+            $gpio_obj->cleanMsgQueues();
+            exit;
+        case SIGHUP:
+            // handle restart tasks
+            $gpio_obj->still_running = true;
+            $gpio_obj->cleanMsgQueues();
+            break;
+        case SIGUSR1:
+            echo "Caught SIGUSR1...\n";
+            break;
+        default:
+            // handle all other signals
+            break;
+    }
+    return 0;
+}
 
 # remove the lock on exit (Control+C doesn't count as 'exit'?)
 register_shutdown_function('unlink', PID_FILE);
@@ -67,30 +97,3 @@ function tryPidLock() : ?string
     return 'Could not create PID file '.PID_FILE;
 }
 
-/**
- * signal handler function
- * Not all are implemented
- */
-function sig_handler(int $sigNo, array $sigInfo) : void {
-    echo "Interrupt $sigNo :" . print_r($sigInfo, 1);
-    $gpio_obj = GPIOSysVSrv::getInstance(); // let's get the same instance
-    switch ($sigNo) {
-        case SIGTERM:
-            // handle shutdown tasks
-            $gpio_obj->still_running = false;
-            $gpio_obj->cleanMsgQueues();
-            exit;
-        case SIGHUP:
-            // handle restart tasks
-            $gpio_obj->still_running = true;
-            $gpio_obj->cleanMsgQueues();
-            break;
-        case SIGUSR1:
-            echo "Caught SIGUSR1...\n";
-            break;
-        default:
-            // handle all other signals
-            break;
-    }
-
-}

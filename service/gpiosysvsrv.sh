@@ -9,9 +9,11 @@
 
 # Fixed Files
 PHP=/usr/bin/php
+CODEPATH=/usr/local/gpiosysv/
 CONFDIR=/etc/gpiosysv.d/
 CONFFILE=${CONFDIR}/gpiosysvsrv.conf
 RUNFILE=/var/run/gpiosysv.pid
+
 
 # Config File overrides defaults
 if [ -e $CONFFILE ]; then
@@ -29,10 +31,11 @@ function panic() {
 
 function stop() {
   [ -n "${GPIOSYSVPID}" ] && kill -SIGTERM ${GPIOSYSVPID}
-  kill -SIGTERM ${GPIOSYSVPID}
+  # kill -SIGTERM ${GPIOSYSVPID}
 }
 
 function start() {
+  echo "${PHP} ${CODEPATH}gpiosysvsrv.php"
   ${PHP} ${CODEPATH}gpiosysvsrv.php
 }
 
