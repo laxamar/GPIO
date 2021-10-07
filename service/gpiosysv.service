@@ -6,11 +6,14 @@ After=syslog.target network.target
 Type=forking
 RemainAfterExit=yes
 # EnvironmentFile=/etc/gpiosysv.d/gpiosysvsrv.conf
+PIDFile=/run/gpiosysvsrv.pid
 WorkingDirectory=/usr/local/gpiosysv
 ExecStart=/usr/local/gpiosysv/gpiosysvsrv.sh start
 ExecStop=/usr/local/gpiosysv/gpiosysvsrv.sh stop
 ExecReload=/usr/local/gpiosysv/gpiosysvsrv.sh restart
-Restart=no
+Restart=on-failure
+RestartSec=60s
+KillMode=process
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target default.target graphical.target

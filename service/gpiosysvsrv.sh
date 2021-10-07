@@ -12,7 +12,7 @@ PHP=/usr/bin/php
 CODEPATH=/usr/local/gpiosysv/
 CONFDIR=/etc/gpiosysv.d/
 CONFFILE=${CONFDIR}/gpiosysvsrv.conf
-RUNFILE=/var/run/gpiosysv.pid
+RUNFILE=/run/gpiosysvsrv.pid
 
 
 # Config File overrides defaults
@@ -26,16 +26,18 @@ fi
 
 function panic() {
   [ -n "${GPIOSYSVPID}" ] && kill -SIGKILL ${GPIOSYSVPID}
-  rm -y ${RUNFILE}
+  rm -f ${RUNFILE}
 }
 
 function stop() {
+  echo "Killing PID ${GPIOSYSVPID}"
   [ -n "${GPIOSYSVPID}" ] && kill -SIGTERM ${GPIOSYSVPID}
   # kill -SIGTERM ${GPIOSYSVPID}
 }
 
 function start() {
   echo "${PHP} ${CODEPATH}gpiosysvsrv.php"
+  cd ${CODEPATH}
   ${PHP} ${CODEPATH}gpiosysvsrv.php
 }
 

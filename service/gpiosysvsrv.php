@@ -10,7 +10,15 @@ require 'vendor/autoload.php';
 
 use Amar\GPIOSysV\GPIOSysVSrv;
 
-define('PID_FILE', "/var/run/" . basename($argv[0], ".php") . ".pid");
+define('PID_FILE', "/run/" . basename($argv[0], ".php") . ".pid");
+
+// fork: a twin process is created
+if(($pid = pcntl_fork()) == -1) { exit("Error forking...\n"); }
+
+if($pid != 0) {
+    // Parent code goes here
+    exit();
+}
 
 if (!empty($pid_error = tryPidLock()))
     die($pid_error."\n");
@@ -31,7 +39,7 @@ while ($gpio_obj->still_running) {
     $gpio_obj->process_queue();
 }
 
-exit;
+exit();
 
 /**
  * Try to create a run file with the pid of the current process name and make sure no two processes run it
@@ -80,12 +88,12 @@ function sigHandler (int $sigNo, array $sigInfo) : int {
         case SIGTERM:
             // handle shutdown tasks
             $gpio_obj->still_running = false;
-            $gpio_obj->cleanMsgQueues();
+            $gpio_obj->cleanMsgQueue();
             exit;
         case SIGHUP:
             // handle restart tasks
             $gpio_obj->still_running = true;
-            $gpio_obj->cleanMsgQueues();
+            $gpio_obj->cleanMsgQueue();
             break;
         case SIGUSR1:
             echo "Caught SIGUSR1...\n";
