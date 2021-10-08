@@ -1,4 +1,10 @@
 {
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../packages/my-package"
+        }
+    ],
     "require": {
         "php": "^7.3||^8.0",
         "laxamar/gpiosysv": "*",
