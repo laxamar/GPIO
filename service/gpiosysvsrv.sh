@@ -9,7 +9,7 @@
 
 # Fixed Files
 PHP=/usr/bin/php
-CODEPATH=/usr/local/gpiosysv/
+CODEPATH=/usr/local/GPIOSysV/service/
 CONFDIR=/etc/gpiosysv.d/
 CONFFILE=${CONFDIR}/gpiosysvsrv.conf
 RUNFILE=/run/gpiosysvsrv.pid
