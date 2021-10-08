@@ -11,5 +11,11 @@
         "piphp/gpio": "*",
         "ext-sysvmsg": "*",
         "ext-pcntl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Amar\\GPIOSysV\\": "laxamar/gpiosysv/src",
+            "PiPHP\\GPIO\\": "piphp/gpio/src"
+        }
     }
 }
