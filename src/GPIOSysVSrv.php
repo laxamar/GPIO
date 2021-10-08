@@ -9,8 +9,7 @@ use PiPHP\GPIO\Pin\PinInterface;
 use PiPHP\GPIO\Pin\Pin;
 use PiPHP\GPIO\Pin\InputPin;
 use PiPHP\GPIO\Pin\OutputPin;
-use const PiPHP\GPIO\PinInterface::VALUE_HIGH
-use const PiPHP\GPIO\PinInterface::LOW_HIGH
+use const PiPHP\GPIO\PinInterface\{VALUE_HIGH,LOW_HIGH};
 
 class GPIOSysVSrv implements GPIOSysVInterface
 {
