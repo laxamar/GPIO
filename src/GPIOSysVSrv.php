@@ -14,6 +14,9 @@ class GPIOSysVSrv implements GPIOSysVInterface
     private $debug;
     public  $still_running;
 
+    const DEBUG_FILE = '/var/tmp/GPIOSysVSrv.log';
+
+
     /**
      * Singleton object to handle all pins
      * @return mixed
@@ -50,6 +53,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
             if ($stat['msg_qnum'] > 0) {
                 msg_receive($seg, self::MSG_TYPE_GPIO, $msg_type, self::MSG_MAX_SIZE,
                     $data, true, 0, $error_code);
+                if ($this->debug) $this->log( 'Messages Received : ', $data );
                 // check for errors
                 if (!empty($error_code))
                 {
@@ -407,7 +411,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     private function log(string $message, ?array $data = null)
     {
-        // TODO: Implement log() method.
+        file_put_contents(self::DEBUG_FILE, $message.':'.print_r($data,1), FILE_APPEND | LOCK_EX );
     }
 
     /**

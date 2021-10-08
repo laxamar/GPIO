@@ -12,6 +12,7 @@ class GPIOSysVClt implements GPIOSysVInterface
 {
     static private $instance;
     private $debug;
+    const DEBUG_FILE = '/var/tmp/GPIOSysVClt.log';
 
     static public function getInstance()
     {
@@ -36,9 +37,13 @@ class GPIOSysVClt implements GPIOSysVInterface
         $seg      = msg_get_queue(GPIOSysVInterface::MSG_QUEUE_ID);
         $msg_type = GPIOSysVInterface::MSG_TYPE_GPIO;
         $dispatch_error = null;
+        if ($this->debug) {
+            $this->log('Dispatch :', $data);
+        }
         $dispatch_success = msg_send($seg, $msg_type, $data, true, true, $dispatch_error);
         if (!empty($dispatch_error))
         {
+            $this->log('   Error :', [$dispatch_error]);
             $error_code .= $dispatch_error;
         }
         return $dispatch_success;
@@ -246,7 +251,7 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     private function log(string $message, ?array $data = null)
     {
-        // TODO: Implement log() method.
+        file_put_contents(self::DEBUG_FILE,$message.':'.print_r($data,1), FILE_APPEND | LOCK_EX );
     }
 
     /**

@@ -34,6 +34,7 @@ pcntl_signal(SIGHUP,  "sigHandler");
 pcntl_signal(SIGUSR1, "sigHandler");
 
 $gpio_obj = GPIOSysVSrv::getInstance();
+$gpio_obj->setDebug(true);
 $gpio_obj->still_running = true;
 while ($gpio_obj->still_running) {
     $gpio_obj->process_queue();
