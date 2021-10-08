@@ -2,7 +2,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../../packages/my-package"
+            "url": "../src/"
         }
     ],
     "require": {
