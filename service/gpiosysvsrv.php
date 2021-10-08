@@ -8,14 +8,6 @@
 
 require 'vendor/autoload.php';
 
-function custom_autoloader($class) {
-    include 'lib/' . $class . '.php';
-}
-
-spl_autoload_register('custom_autoloader');
-
-set_include_path(get_include_path() . PATH_SEPARATOR . '../src/');
-
 use Amar\GPIOSysV\GPIOSysVSrv;
 use PiPHP\GPIO\FileSystem\FileSystem;
 use PiPHP\GPIO\FileSystem\FileSystemInterface;
