@@ -6,7 +6,9 @@
  * @copyright 2019-2021 Amar Micro Inc.
  */
 
-require 'vendor/autoload.php';
+# require 'vendor/autoload.php';
+
+set_include_path(get_include_path() . PATH_SEPARATOR . '../src/');
 
 use Amar\GPIOSysV\GPIOSysVSrv;
 
