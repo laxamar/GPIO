@@ -11,6 +11,13 @@ require 'vendor/autoload.php';
 set_include_path(get_include_path() . PATH_SEPARATOR . '../src/');
 
 use Amar\GPIOSysV\GPIOSysVSrv;
+use PiPHP\GPIO\FileSystem\FileSystem;
+use PiPHP\GPIO\FileSystem\FileSystemInterface;
+use PiPHP\GPIO\Interrupt\InterruptWatcher;
+use PiPHP\GPIO\Pin\Pin;
+use PiPHP\GPIO\Pin\InputPin;
+use PiPHP\GPIO\Pin\OutputPin;
+
 
 define('PID_FILE', "/run/" . basename($argv[0], ".php") . ".pid");
 
