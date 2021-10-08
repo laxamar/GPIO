@@ -8,6 +8,7 @@
     "require": {
         "php": "^7.3||^8.0",
         "laxamar/gpiosysv": "*",
+        "piphp/gpio": "*",
         "ext-sysvmsg": "*",
         "ext-pcntl": "*"
     }
