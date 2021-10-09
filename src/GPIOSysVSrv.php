@@ -208,7 +208,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 }
             }
         }
-        pcntl_signal(SIGALARM, null);
+        pcntl_signal(SIGALRM, null);
 
     }
 
@@ -219,7 +219,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param null $error_code msg_send error code if any
      * @return bool
      */
-    protected function msg_back(array $data, array $response, &$error_code = null) : bool
+    protected function msg_back(array $data, array $response, &$error_code = null) : ?bool
     {
         $seg      = msg_get_queue($data['msg_queue_id']);
         $msg_type = $data['msg_type'];
@@ -237,7 +237,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function setPinHigh($pin_id, &$error_code = null) : bool
+    function setPinHigh($pin_id, &$error_code = null) : ?bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         // if ($this->debug) $this->Log('VALUE_HIGH:'.print_r(VALUE_HIGH,1));
@@ -248,7 +248,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function setPinLow($pin_id, &$error_code = null) : bool
+    function setPinLow($pin_id, &$error_code = null) : ?bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         // if ($this->debug) $this->Log('VALUE_LOW:'.print_r(VALUE_LOW,1));
@@ -267,7 +267,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function setArrayLow($pin_array, &$error_code = null) : bool
+    function setArrayLow($pin_array, &$error_code = null) : ?bool
     {
         foreach ($pin_array as $pin_id) {
             $this->setPinLow($pin_id);
@@ -278,7 +278,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    function setArrayHigh($pin_array, &$error_code = null) : bool
+    function setArrayHigh($pin_array, &$error_code = null) : ?bool
     {
         foreach ($pin_array as $pin_id) {
             $this->setPinHigh($pin_id);
@@ -289,7 +289,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    function setPinsBinary($value, $pin_array, string &$error_code=null) : bool
+    function setPinsBinary($value, $pin_array, string &$error_code=null) : ?bool
     {
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
@@ -314,7 +314,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param string|null $error_code
      * @return bool
      */
-    function flashBinary(int $value, array $pin_array, int $select_pin, ?string &$error_code=null) : bool
+    function flashBinary(int $value, array $pin_array, int $select_pin, ?string &$error_code=null) : ?bool
     {
         $success = true;
         // set pin to turn off output
@@ -345,7 +345,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @return bool
      */
     function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ? int $period=1000000,
-                         ?string &$error_code=null) : bool
+                         ?string &$error_code=null) : ?bool
     {
         // set pin to turn off output
         $this->setPinLow($select_pin);
@@ -378,7 +378,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param string|null $error_code
      * @return bool
      */
-    function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool
+    function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : ?bool
     {
         $return_status = true;
         for ($seq=1; $seq <= $count; $seq++)
@@ -402,7 +402,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * @param string|null $error_code
      * @return bool
      */
-    function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool
+    function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : ?bool
     {
         $return_status = true;
         for ($seq=1; $seq <= $count; $seq++)
@@ -446,7 +446,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
 
     /**
      * signal handler function
-     * Currently used for SIGALARM Only.
+     * Currently used for SIGALRM Only.
      * The rest are here for show
      */
     function sigAlarmHandler (int $sigNo, array $sigInfo) : int {

@@ -32,14 +32,14 @@ interface GPIOSysVInterface
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
      */
-    public function setPinHigh(int $pin_id, string &$error_code=null) : bool;
+    public function setPinHigh(int $pin_id, string &$error_code=null) : ?bool;
 
     /**
      * Set pin in output mode - LOW - Turn off any LEDs
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
      */
-    public function setPinLow(int $pin_id, string &$error_code=null) : bool;
+    public function setPinLow(int $pin_id, string &$error_code=null) : ?bool;
 
     /**
      * Get pin value input mode
@@ -53,14 +53,14 @@ interface GPIOSysVInterface
      * @param  	array	$pin_array	The GPIO pin list
      * @access 	public
      */
-    public function setArrayLow(array $pin_array, string &$error_code=null) : bool ;
+    public function setArrayLow(array $pin_array, string &$error_code=null) : ?bool ;
 
     /**
      * set an Array of pins High
      * @param  	array	$pin_array	The GPIO pin list
      * @access 	public
      */
-    public function setArrayHigh(array $pin_array, string &$error_code=null) : bool ;
+    public function setArrayHigh(array $pin_array, string &$error_code=null) : ?bool ;
 
     /**
      * Map pins to binary representation of a $value
@@ -68,7 +68,7 @@ interface GPIOSysVInterface
      * @param array	$pin_array	The list GPIO Pin IDs used
      * @access 	public
      */
-    public function setPinsBinary(int $value, array $pin_array, string &$error_code=null) : bool;
+    public function setPinsBinary(int $value, array $pin_array, string &$error_code=null) : ?bool;
 
     /**
      * Flash a list of GPIO pins ONCE mapped to a binary representation of a $value controlled by a master $select_pin
@@ -77,27 +77,27 @@ interface GPIOSysVInterface
      * @param int $select_pin the controlling pin that flashes all
      * @access 	public
      */
-    public function flashBinary(int $value, array $pin_array, int $select_pin, string &$error_code=null) : bool;
+    public function flashBinary(int $value, array $pin_array, int $select_pin, string &$error_code=null) : ?bool;
 
     /**
      * Set pin in output mode - HIGH
      * @param  	array	$pin_array	The GPIO Pin ID used
      * @access 	public
      */
-    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=1, ?int $period=1000000, string &$error_code=null) : bool;
+    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=1, ?int $period=1000000, string &$error_code=null) : ?bool;
 
     /**
      * Flash a pin (HIGH then LOW) instead of turning it simply on/off
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
      */
-    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool;
+    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : ?bool;
 
     /**
      * Flash a pin (LOW then HIGH) instead of turning it simply on/off
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @access 	public
      */
-    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : bool;
+    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code=null) : ?bool;
 
 }

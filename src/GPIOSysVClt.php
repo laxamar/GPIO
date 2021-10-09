@@ -52,7 +52,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinHigh(int $pin_id, &$error_code = null) :bool
+    public function setPinHigh(int $pin_id, &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'setPinHigh',
@@ -66,7 +66,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinLow(int $pin_id, &$error_code = null) : bool
+    public function setPinLow(int $pin_id, &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'setPinLow',
@@ -119,7 +119,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function setArrayLow(array $pin_array, &$error_code=null) : bool
+    public function setArrayLow(array $pin_array, &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'setArrayLow',
@@ -133,7 +133,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function setArrayHigh(array $pin_array, &$error_code=null) : bool
+    public function setArrayHigh(array $pin_array, &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'setArrayHigh',
@@ -147,7 +147,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    function setPinsBinary($value, $pin_array, &$error_code=null) :bool
+    function setPinsBinary($value, $pin_array, &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'setPinsBinary',
@@ -166,7 +166,7 @@ class GPIOSysVClt implements GPIOSysVInterface
      * @param null $error_code
      * @return bool
      */
-    function flashBinary(int $value, array $pin_array, int $select_pin, &$error_code = null) : bool
+    function flashBinary(int $value, array $pin_array, int $select_pin, &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashBinary',
@@ -189,7 +189,7 @@ class GPIOSysVClt implements GPIOSysVInterface
      * @param null $error_code
      * @return bool
      */
-    function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ?int $period=1000000, &$error_code=null) : bool
+    function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ?int $period=1000000, &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'strobeBinary',
@@ -208,7 +208,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * flash_pin - Flash a pin instead of turning it on.
      *    loop $count time
-     *        turn on - wait $on_dalay - turn off - wait $off_delay
+     *        turn on - wait $on_delay - turn off - wait $off_delay
      * @param int $pin_id
      * @param int|null $count number of times to flash
      * @param int|null $on_delay in useconds
@@ -216,7 +216,7 @@ class GPIOSysVClt implements GPIOSysVInterface
      * @param string|null $error_code
      * @return bool
      */
-    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : bool
+    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashPinHighLow',
@@ -230,7 +230,7 @@ class GPIOSysVClt implements GPIOSysVInterface
         return $this->dispatch($data, $error_code);
     }
 
-    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : bool
+    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashPinLowHigh',
