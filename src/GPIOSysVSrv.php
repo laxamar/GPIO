@@ -133,7 +133,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $success &= $this->setArrayHigh($pin_array, $error_code);
                         break;
                     case 'setPinsBinary':
-                        $dec_value = $data['parms']['dec_value'] ?? null;
+                        $dec_value = $data['parms']['value'] ?? null;
                         $pin_array = $data['parms']['pin_array'] ?? [];
                         if (is_null($dec_value) || empty($pin_array))
                         {
@@ -293,7 +293,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     {
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
-        if ($this->debug) $this->log($value . ' => '. print_r($binary,1));
+        if ($this->debug) $this->log('setPinsBinary '.$value , $binary);
         // $this->all_off($PIN_ARRAY);
         $return_status = true;
         for ($pos=0;$pos < $bits; $pos++) {
