@@ -240,7 +240,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     function setPinHigh($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        if ($this->debug) $this->Log('VALUE_HIGH:'.print_r(self::VALUE_HIGH,1));
+        if ($this->debug) $this->Log('VALUE_HIGH:'.print_r(PiPHP\GPIO\PinInterface\VALUE_HIGH,1));
         $pin->setValue(self::VALUE_HIGH);
         return true;
     }
@@ -251,7 +251,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     function setPinLow($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        if ($this->debug) $this->Log('VALUE_LOW:'.print_r(self::VALUE_LOW,1));
+        if ($this->debug) $this->Log('VALUE_LOW:'.print_r(PiPHP\GPIO\PinInterface\VALUE_LOW,1));
         return $pin->setValue(self::VALUE_LOW);
     }
 
