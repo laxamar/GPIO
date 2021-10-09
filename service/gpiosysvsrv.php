@@ -38,7 +38,7 @@ pcntl_async_signals(TRUE);
 pcntl_signal(SIGTERM, "sigHandler");
 pcntl_signal(SIGHUP,  "sigHandler");
 pcntl_signal(SIGUSR1, "sigHandler");
-// DO NOT TAKE OVER SIGALARM!! Used internally by processQueue
+// DO NOT TAKE OVER SIGALRM!! Used internally by processQueue
 
 $gpio_obj = GPIOSysVSrv::getInstance();
 $gpio_obj->setDebug(true);

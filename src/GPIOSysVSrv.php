@@ -54,7 +54,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
         pcntl_async_signals(TRUE);
 
         // setup signal handlers
-        pcntl_signal(SIGALARM, [$this, "sigAlarmHandler"]);
+        pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
 
         while ($this->still_running)
         {
@@ -461,7 +461,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 $this->still_running = true;
                 $this->cleanMsgQueue();
                 break;
-            case SIGALARM:
+            case SIGALRM:
                 // stop msg_receive loop to check for still_running
                 break;
             default:
