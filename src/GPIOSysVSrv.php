@@ -2,6 +2,7 @@
 
 namespace Amar\GPIOSysV;
 
+use PiPHP\GPIO\GPIO;
 use PiPHP\GPIO\FileSystem\FileSystem;
 use PiPHP\GPIO\FileSystem\FileSystemInterface;
 use PiPHP\GPIO\Interrupt\InterruptWatcher;
