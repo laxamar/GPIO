@@ -16,7 +16,6 @@ use PiPHP\GPIO\Pin\Pin;
 use PiPHP\GPIO\Pin\InputPin;
 use PiPHP\GPIO\Pin\OutputPin;
 
-
 define('PID_FILE', "/run/" . basename($argv[0], ".php") . ".pid");
 
 // fork: a twin process is created

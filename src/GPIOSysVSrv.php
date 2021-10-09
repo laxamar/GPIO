@@ -9,7 +9,8 @@ use PiPHP\GPIO\Pin\PinInterface;
 use PiPHP\GPIO\Pin\Pin;
 use PiPHP\GPIO\Pin\InputPin;
 use PiPHP\GPIO\Pin\OutputPin;
-use const PiPHP\GPIO\PinInterface\{VALUE_HIGH,LOW_HIGH};
+use const PiPHP\GPIO\PinInterface\VALUE_HIGH as VALUE_HIGH;
+use const PiPHP\GPIO\PinInterface\VALUE_LOW as VALUE_LOW;
 
 class GPIOSysVSrv implements GPIOSysVInterface
 {
@@ -228,7 +229,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     function setPinHigh($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        $pin->setValue(VALUE_HIGH);
+        $pin->setValue(self::VALUE_HIGH);
         return true;
     }
 
@@ -238,7 +239,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     function setPinLow($pin_id, &$error_code = null) : bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        return $pin->setValue(VALUE_LOW);
+        return $pin->setValue(self::VALUE_LOW);
     }
 
     /**
