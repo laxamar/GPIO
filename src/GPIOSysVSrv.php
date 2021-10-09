@@ -43,7 +43,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      * process the input queue indefinitely or until a signal is sent to stop running
      */
-    public function process_queue()
+    public function processQueue()
     {
         $seg      = msg_get_queue(self::MSG_QUEUE_ID);
         $msg_type = self::MSG_TYPE_GPIO;
@@ -51,13 +51,21 @@ class GPIOSysVSrv implements GPIOSysVInterface
         $error_code = null;
         $success    = true; // re-initialized inside loop
 
+        pcntl_async_signals(TRUE);
+
+        // setup signal handlers
+        pcntl_signal(SIGALARM, [$this, "sigAlarmHandler"]);
+
         while ($this->still_running)
         {
-            $stat = msg_stat_queue($seg);
-            if ($this->debug) $this->log( 'Messages in the msg_queue: ' . $stat['msg_qnum'] );
-            if ($stat['msg_qnum'] > 0) {
-                msg_receive($seg, self::MSG_TYPE_GPIO, $msg_type, self::MSG_MAX_SIZE,
-                    $data, true, 0, $error_code);
+            // $stat = msg_stat_queue($seg);
+            // if ($this->debug) $this->log( 'Messages in the msg_queue: ' . $stat['msg_qnum'] );
+            // if ($stat['msg_qnum'] > 0) {
+            // Set an alarm to wait for 1 second before checking for "still_running"
+            pcntl_alarm(1);
+            while (msg_receive($seg, self::MSG_TYPE_GPIO, $msg_type, self::MSG_MAX_SIZE,
+                    $data, true, 0, $error_code) )
+            {
                 if ($this->debug) $this->log( 'Messages Received : ', $data );
                 // check for errors
                 if (!empty($error_code))
@@ -199,6 +207,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 }
             }
         }
+        pcntl_signal(SIGALARM, null);
+
     }
 
     /**
@@ -432,5 +442,34 @@ class GPIOSysVSrv implements GPIOSysVInterface
         $this->debug = $set_debug;
         return $prev;
     }
+
+    /**
+     * signal handler function
+     * Currently used for SIGALARM Only.
+     * The rest are here for show
+     */
+    function sigAlarmHandler (int $sigNo, array $sigInfo) : int {
+        // echo "Interrupt $sigNo :" . print_r($sigInfo, 1);
+        switch ($sigNo) {
+            case SIGTERM:
+                // handle shutdown tasks
+                $this->still_running = false;
+                $this->cleanMsgQueue();
+                exit;
+            case SIGHUP:
+                // handle restart tasks
+                $this->still_running = true;
+                $this->cleanMsgQueue();
+                break;
+            case SIGALARM:
+                // stop msg_receive loop to check for still_running
+                break;
+            default:
+                // handle all other signals
+                break;
+        }
+        return 0;
+    }
+
 
 }
