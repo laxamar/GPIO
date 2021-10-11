@@ -30,9 +30,10 @@ class GPIOSysVClt implements GPIOSysVInterface
      * Dispatch a data block through SysV to a server
      * @param array $data to be passed to server
      * @param null $error_code msg_send error code if any
+     * @param int|null $block_time time to block after dispatch to synchronize with server timing.
      * @return bool
      */
-    private function dispatch(array $data, &$error_code = null) : bool
+    private function dispatch(array $data, &$error_code = null, ?int $block_time=null) : bool
     {
         $seg      = msg_get_queue(GPIOSysVInterface::MSG_QUEUE_ID);
         $msg_type = GPIOSysVInterface::MSG_TYPE_GPIO;
@@ -41,6 +42,8 @@ class GPIOSysVClt implements GPIOSysVInterface
             $this->log('Dispatch :', $data);
         }
         $dispatch_success = msg_send($seg, $msg_type, $data, true, true, $dispatch_error);
+        // TODO: Take some time off for function call overhead
+        if (!empty($block_time)) usleep($block_time);
         if (!empty($dispatch_error))
         {
             $this->log('   Error :', [$dispatch_error]);
@@ -147,7 +150,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    function setPinsBinary($value, $pin_array, &$error_code=null) : ?bool
+    public function setPinsBinary($value, $pin_array, &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'setPinsBinary',
@@ -160,36 +163,28 @@ class GPIOSysVClt implements GPIOSysVInterface
     }
 
     /**
-     * @param int|null $value
-     * @param array $pin_array
-     * @param int|null $select_pin
-     * @param null $error_code
-     * @return bool
+     * {@inheritdoc}
      */
-    function flashBinary(int $value, array $pin_array, int $select_pin, &$error_code = null) : ?bool
+    public function flashBinary(int $value, array $pin_array, int $select_pin,  ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashBinary',
             'parms'    => [
                 'value'      => $value,
                 'pin_array'  => $pin_array,
-                'select_pin' => $select_pin
+                'select_pin' => $select_pin,
+                'high_delay' => $high_delay,
+                'low_delay'  => $low_delay
             ]
         ];
-        return $this->dispatch($data, $error_code);
+        $block_time = $blocking ? ($high_delay+$low_delay) : null;
+        return $this->dispatch($data, $error_code, $block_time);
     }
 
     /**
-     * @param int $value
-     * @param array $pin_array
-     * @param int $select_pin
-     * @param int|null $count
-     * @param int|null $empty
-     * @param int|null $period
-     * @param null $error_code
-     * @return bool
+     * {@inheritdoc}
      */
-    function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $empty=0, ?int $period=1000000, &$error_code=null) : ?bool
+    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $off_count=0, ?int $period=1000000, ?bool $blocking=true, ?string &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'strobeBinary',
@@ -198,50 +193,48 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'pin_array'  => $pin_array,
                 'select_pin' => $select_pin,
                 'count'      => $count,
-                'empty'      => $empty,
+                'off_count'  => $off_count,
                 'period'     => $period
             ]
         ];
-        return $this->dispatch($data, $error_code);
+        $block_time = $blocking ? $count*$period : null;
+        return $this->dispatch($data, $error_code, $block_time);
     }
 
     /**
-     * flash_pin - Flash a pin instead of turning it on.
-     *    loop $count time
-     *        turn on - wait $on_delay - turn off - wait $off_delay
-     * @param int $pin_id
-     * @param int|null $count number of times to flash
-     * @param int|null $on_delay in useconds
-     * @param int|null $off_delay in useconds
-     * @param string|null $error_code
-     * @return bool
+     * {@inheritdoc}
      */
-    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : ?bool
+    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, ?string &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashPinHighLow',
             'parms'    => [
                 'pin_id'    => $pin_id,
                 'count'     => $count,
-                'on_delay'  => $on_delay,
-                'off_delay' => $off_delay
+                'high_delay' => $high_delay,
+                'low_delay' => $low_delay
             ]
         ];
-        return $this->dispatch($data, $error_code);
+        $block_time = $blocking ? $count*($high_delay+$low_delay) : null;
+        return $this->dispatch($data, $error_code, $block_time);
     }
 
-    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $on_delay = 50000, ?int $off_delay = 50000, ?string &$error_code = null) : ?bool
+    /**
+     * {@inheritdoc}
+     */
+    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $low_delay = 50000, ?int $high_delay = 50000, ?bool $blocking=true, ?string &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashPinLowHigh',
             'parms'    => [
                 'pin_id'    => $pin_id,
                 'count'     => $count,
-                'on_delay'  => $on_delay,
-                'off_delay' => $off_delay
+                'low_delay'  => $low_delay,
+                'high_delay' => $high_delay
             ]
         ];
-        return $this->dispatch($data, $error_code);
+        $block_time = $blocking ? $count*($low_delay+$high_delay) : null;
+        return $this->dispatch($data, $error_code, $block_time);
     }
 
     /**
@@ -259,7 +252,7 @@ class GPIOSysVClt implements GPIOSysVInterface
      * @param bool $set_debug
      * @return bool
      */
-    function setDebug(bool $set_debug) : bool
+    public function setDebug(bool $set_debug) : bool
     {
         $prev = $this->debug ?? false;
         $this->debug = $set_debug;
