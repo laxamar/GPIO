@@ -80,7 +80,10 @@ class GPIOSysVClt implements GPIOSysVInterface
         return $this->dispatch($data, $error_code);
     }
 
-    public function getPin(int $pin_id, &$error_code=null) : ?int
+    /**
+     *  {@inheritdoc}
+     */
+    public function getPin(int $pin_id, ?string &$error_code=null) : ?int
     {
         $msg_queue_id = self::MSG_BACK_ID;
         $msg_type_back = self::MSG_BACK_GPIO; // TODO: add a unique number
@@ -112,6 +115,48 @@ class GPIOSysVClt implements GPIOSysVInterface
                 $this->log('Empty receive:', $data);
             }
             return $data['pin_status'] ?? null;
+        } else {
+            $error_code .= '9999';
+            return null;
+        }
+
+    }
+
+    /**
+     *  {@inheritdoc}
+     */
+    public function getPinArray(array $pin_array, ?string &$error_code=null) : ?array
+    {
+        $msg_queue_id = self::MSG_BACK_ID;
+        $msg_type_back_array = self::MSG_BACK_ARRAY; // TODO: add a unique number
+
+        $data = [
+            'function' => 'getPinArray',
+            'parms' => [
+                'pin_array' => $pin_array,
+                'msg_queue_id' => $msg_queue_id,
+                'msg_type' => $msg_type_back_array,
+            ]
+        ];
+        $this->dispatch($data, $error_code);
+        // Now wait for the answer (OMG)
+        $seg = msg_get_queue($msg_queue_id);
+        $stat = msg_stat_queue($seg);
+        // TODO: Loop and Wait a reasonable amount of time before reading
+        if ($stat['msg_qnum'] > 0) {
+            msg_receive($seg, $msg_type_back_array, $msg_type, self::MSG_MAX_SIZE,
+                $response, true, 0, $error_code);
+            // check for errors
+            if (!empty($error_code)) {
+                $this->log('Error code :' . $error_code, $data);
+            }
+            if ($msg_type != $msg_type_back_array) {
+                $this->log('Received wrong message type back instead of expected ' . $msg_type_back_array . ' we got :' . $msg_type, $data);
+            }
+            if (is_null($response)) {
+                $this->log('Empty receive:', $data);
+            }
+            return $data['array_status'] ?? null;
         } else {
             $error_code .= '9999';
             return null;

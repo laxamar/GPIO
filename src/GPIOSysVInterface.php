@@ -25,7 +25,8 @@ interface GPIOSysVInterface
     const MSG_QUEUE_ID = '26274746';
     const MSG_BACK_ID  = '47462627';
     const MSG_TYPE_GPIO = '4746';
-    const MSG_BACK_GPIO = '6474';
+    const MSG_BACK_GPIO  = '6474';
+    const MSG_BACK_ARRAY = '647484';
     const MSG_MAX_SIZE = 2048;
 
     /**
@@ -50,16 +51,25 @@ interface GPIOSysVInterface
      * Get pin value input mode
      * @param  	int	$pin_id	The GPIO Pin ID used
      * @param   string|null $error_code bubble up error code description
-     * @return bool|null
+     * @return int|null
      * @access 	public
      */
     public function getPin(int $pin_id, ?string &$error_code=null) : ?int;
 
     /**
+     * get the status of an array of pins
+     * @param array $pin_array
+     * @param string|null $error_code
+     * @return array|null
+     * @access public
+     */
+    public function getPinArray(array $pin_array, ?string &$error_code = null) : ?array;
+
+    /**
      * set an array of pins to Low
      * @param  array	$pin_array	The GPIO pin list
      * @param  string|null $error_code bubble up error code description
-     * @return int|null
+     * @return bool|null
      * @access public
      */
     public function setArrayLow(array $pin_array, ?string &$error_code=null) : ?bool ;

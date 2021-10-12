@@ -115,6 +115,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $pin_status = $this->getPin($pin_id, $error_code);
                         $this->msg_back($data, ['pin_status' => $pin_status], $error_code);
                         break;
+                    case 'getPinArray':
+                        $pin_array = $data['parms']['pin_array'] ?? null;
+                        $array_status = $this->getPinArray($pin_array, $error_code);
+                        $this->msg_back($data, ['array_status' => $array_status], $error_code);
+                        break;
                     case 'setArrayLow':
                         $pin_array = $data['parms']['pin_array'] ?? [];
                         if (empty($pin_array)) {
@@ -246,7 +251,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinHigh($pin_id, &$error_code = null) : ?bool
+    public function setPinHigh(int $pin_id, ?string &$error_code = null) : ?bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         // if ($this->debug) $this->Log('VALUE_HIGH:'.print_r(VALUE_HIGH,1));
@@ -257,7 +262,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinLow($pin_id, &$error_code = null) : ?bool
+    public function setPinLow(int $pin_id, ?string &$error_code = null) : ?bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
         // if ($this->debug) $this->Log('VALUE_LOW:'.print_r(VALUE_LOW,1));
@@ -267,16 +272,30 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function getPin($pin_id, &$error_code = null) : ?int
+    public function getPin(int $pin_id, ?string &$error_code = null) : ?int
     {
-        $pin = $this->gpio_obj->getOutputPin($pin_id);
+        $pin = $this->gpio_obj->getInputPin($pin_id);
         return $pin->getValue();
     }
 
     /**
      *  {@inheritdoc}
      */
-    public function setArrayLow($pin_array, &$error_code = null) : ?bool
+    public function getPinArray(array $pin_array, ?string &$error_code = null) : ?array
+    {
+        $state = [];
+        foreach ($pin_array as $pin_id)
+        {
+            $pin   = $this->gpio_obj->getInputPin($pin_id);
+            $state[$pin_id] = $pin->getValue();
+        }
+        return $state;
+    }
+
+    /**
+     *  {@inheritdoc}
+     */
+    public function setArrayLow(array $pin_array, ?string &$error_code = null) : ?bool
     {
         foreach ($pin_array as $pin_id) {
             $this->setPinLow($pin_id);
