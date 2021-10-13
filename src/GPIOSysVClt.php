@@ -145,7 +145,7 @@ class GPIOSysVClt implements GPIOSysVInterface
         // TODO: Loop and Wait a reasonable amount of time before reading
         pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
         // Set an alarm to wait for 1 second before checking for "still_running"
-        pcntl_alarm(1);
+        pcntl_alarm(0.25);
 
         if ( msg_receive($seg, $msg_type_back_array, $msg_type, self::MSG_MAX_SIZE,
                 $response, true, 0, $error_code) )

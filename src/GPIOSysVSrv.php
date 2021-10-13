@@ -112,11 +112,21 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'getPin':
                         $pin_id = $data['parms']['pin_id'] ?? null;
+                        if (empty($pin_id)) {
+                            $success = false;
+                            $this->log($function_call.' with empty pin_id', $data);
+                            break;
+                        }
                         $pin_status = $this->getPin($pin_id, $error_code);
                         $this->msg_back($data, ['pin_status' => $pin_status], $error_code);
                         break;
                     case 'getPinArray':
                         $pin_array = $data['parms']['pin_array'] ?? null;
+                        if (empty($pin_array)) {
+                            $success = false;
+                            $this->log($function_call. ' with empty array', $data);
+                            break;
+                        }
                         $array_status = $this->getPinArray($pin_array, $error_code);
                         $this->msg_back($data, ['array_status' => $array_status], $error_code);
                         break;
@@ -235,14 +245,15 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     protected function msg_back(array $data, array $response, &$error_code = null) : ?bool
     {
-        $seg      = msg_get_queue($data['msg_queue_id']);
-        $msg_type = $data['msg_type'];
+        $msg_queue_id = $data['msg_queue_id'] ?? self::MSG_BACK_ID;
+        $msg_type     = $data['msg_type'] ?? self::MSG_BACK_GPIO;
+        $seg          = msg_get_queue($msg_queue_id);
         $response_error = null;
-        $dispatch_success = msg_send($seg, $msg_type, $response, true, true, $response_error_error);
+        $dispatch_success = msg_send($seg, $msg_type, $response, true, true, $response_error);
         if (!$dispatch_success || !empty($response_error))
         {
             $error_code .= $response_error;
-            $this->log('Sending MSG back error: '.$error_code, $data);
+            $this->log('Sending MSG back error: '.print_r($error_code,1), ['data' => $data, 'response' => $response]);
         }
         return $dispatch_success;
     }
