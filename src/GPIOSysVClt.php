@@ -141,7 +141,7 @@ class GPIOSysVClt implements GPIOSysVInterface
         $this->dispatch($data, $error_code);
         // Now wait for the answer (OMG)
         $seg = msg_get_queue($msg_queue_id);
-        $stat = msg_stat_queue($seg);
+        // $stat = msg_stat_queue($seg);
         // TODO: Loop and Wait a reasonable amount of time before reading
         pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
         // Set an alarm to wait for 1 second before checking for "still_running"

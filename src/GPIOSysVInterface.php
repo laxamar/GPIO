@@ -22,11 +22,11 @@ namespace Amar\GPIOSysV;
  */
 interface GPIOSysVInterface
 {
-    const MSG_QUEUE_ID = '26274746';
-    const MSG_BACK_ID  = '47462627';
-    const MSG_TYPE_GPIO = '4746';
-    const MSG_BACK_GPIO  = '6474';
-    const MSG_BACK_ARRAY = '6475';
+    const MSG_QUEUE_ID = 0x26274746;
+    const MSG_BACK_ID  = 0x47462627;
+    const MSG_TYPE_GPIO = 0x4746;
+    const MSG_BACK_GPIO  = 0x6474;
+    const MSG_BACK_ARRAY = 0x6475;
     const MSG_MAX_SIZE = 2048;
 
     /**
