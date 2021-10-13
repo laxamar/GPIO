@@ -162,6 +162,7 @@ class GPIOSysVClt implements GPIOSysVInterface
             }
             return $data['array_status'] ?? null;
         } else {
+            $this->log('getPinArray did not receive msg back', ['data' => $data, 'response' => $response, 'error' => $error_code]);
             $error_code .= '9999';
             return null;
         }
