@@ -128,7 +128,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             break;
                         }
                         $array_status = $this->getPinArray($pin_array, $error_code);
-                        $this->log($function_call, ['data' => $data, 'status' => $array_status, 'error' => $error_code);
+                        $this->log($function_call, ['data' => $data, 'status' => $array_status, 'error' => $error_code]);
                         $this->msg_back($data, ['array_status' => $array_status], $error_code);
                         break;
                     case 'setArrayLow':
