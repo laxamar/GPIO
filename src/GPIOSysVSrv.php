@@ -246,6 +246,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     protected function msg_back(array $data, array $response, &$error_code = null) : ?bool
     {
+        $this->log('Sending MSG back', ['data' => $data, 'response' => $response]);
         $msg_queue_id = $data['msg_queue_id'] ?? self::MSG_BACK_ID;
         $msg_type     = $data['msg_type'] ?? self::MSG_BACK_GPIO;
         $seg          = msg_get_queue($msg_queue_id);
