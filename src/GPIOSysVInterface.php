@@ -26,7 +26,7 @@ interface GPIOSysVInterface
     const MSG_BACK_ID  = '47462627';
     const MSG_TYPE_GPIO = '4746';
     const MSG_BACK_GPIO  = '6474';
-    const MSG_BACK_ARRAY = '647484';
+    const MSG_BACK_ARRAY = '6475';
     const MSG_MAX_SIZE = 2048;
 
     /**
