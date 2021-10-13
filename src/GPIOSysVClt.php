@@ -160,7 +160,7 @@ class GPIOSysVClt implements GPIOSysVInterface
             if (is_null($response)) {
                 $this->log(__METHOD__.' Null $response received:', $data);
             }
-            return $data['array_status'] ?? null;
+            return $response ?? null;
         } else {
             $this->log(__METHOD__. ' did not receive msg back', ['data' => $data, 'response' => $response, 'error' => $error_code]);
             $error_code = $error_code ?? 9999;
