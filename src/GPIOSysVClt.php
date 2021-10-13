@@ -29,25 +29,25 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * Dispatch a data block through SysV to a server
      * @param array $data to be passed to server
-     * @param null $error_code msg_send error code if any
+     * @param int|null $error_code msg_send error code if any
      * @param int|null $block_time time to block after dispatch to synchronize with server timing.
      * @return bool
      */
-    private function dispatch(array $data, &$error_code = null, ?int $block_time=null) : bool
+    private function dispatch(array $data, ?int &$error_code = null, ?int $block_time=null) : bool
     {
         $seg      = msg_get_queue(GPIOSysVInterface::MSG_QUEUE_ID);
         $msg_type = GPIOSysVInterface::MSG_TYPE_GPIO;
         $dispatch_error = null;
         if ($this->debug) {
-            $this->log('Dispatch :', $data);
+            $this->log(__METHOD__, $data);
         }
         $dispatch_success = msg_send($seg, $msg_type, $data, true, true, $dispatch_error);
         // TODO: Take some time off for function call overhead
         if (!empty($block_time)) usleep($block_time);
         if (!empty($dispatch_error))
         {
-            $this->log('   Error :', [$dispatch_error]);
-            $error_code .= $dispatch_error;
+            $this->log(__METHOD__.' $dispatch_error :', [$dispatch_error]);
+            $error_code = $dispatch_error;
         }
         return $dispatch_success;
     }
@@ -55,7 +55,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinHigh(int $pin_id, &$error_code = null) : ?bool
+    public function setPinHigh(int $pin_id, ?int &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'setPinHigh',
@@ -69,7 +69,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinLow(int $pin_id, &$error_code = null) : ?bool
+    public function setPinLow(int $pin_id, ?int &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'setPinLow',
@@ -83,7 +83,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function getPin(int $pin_id, ?string &$error_code=null) : ?int
+    public function getPin(int $pin_id, ?int &$error_code=null) : ?int
     {
         $msg_queue_id = self::MSG_BACK_ID;
         $msg_type_back = self::MSG_BACK_GPIO; // TODO: add a unique number
@@ -106,17 +106,17 @@ class GPIOSysVClt implements GPIOSysVInterface
                 $response, true, 0, $error_code);
             // check for errors
             if (!empty($error_code)) {
-                $this->log('Error code :' . $error_code, $data);
+                $this->log(__METHOD__.' msg_receive() Error code :' . $error_code, $data);
             }
             if ($msg_type != $msg_type_back) {
-                $this->log('Received wrong message type back instead of expected ' . $msg_type_back . ' we got :' . $msg_type, $data);
+                $this->log(__METHOD__.' Received wrong message type back instead of expected ' . $msg_type_back . ' we got :' . $msg_type, $data);
             }
             if (is_null($response)) {
-                $this->log('Empty receive:', $data);
+                $this->log(__METHOD__.' Empty $response received:', $data);
             }
             return $data['pin_status'] ?? null;
         } else {
-            $error_code .= '9999';
+            $error_code = $error_code ?? 9999;
             return null;
         }
 
@@ -125,7 +125,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function getPinArray(array $pin_array, ?string &$error_code=null) : ?array
+    public function getPinArray(array $pin_array, ?int &$error_code=null) : ?array
     {
         $msg_queue_id = self::MSG_BACK_ID;
         $msg_type_back_array = self::MSG_BACK_ARRAY; // TODO: add a unique number
@@ -133,9 +133,9 @@ class GPIOSysVClt implements GPIOSysVInterface
         $data = [
             'function' => 'getPinArray',
             'parms' => [
-                'pin_array' => $pin_array,
+                'pin_array'    => $pin_array,
                 'msg_queue_id' => $msg_queue_id,
-                'msg_type' => $msg_type_back_array,
+                'msg_type'     => $msg_type_back_array,
             ]
         ];
         $this->dispatch($data, $error_code);
@@ -152,18 +152,18 @@ class GPIOSysVClt implements GPIOSysVInterface
         {
             // check for errors
             if (!empty($error_code)) {
-                $this->log('Error code :' . $error_code, $data);
+                $this->log(__METHOD__.' msg_receive() Error code :' . $error_code, $data);
             }
             if ($msg_type != $msg_type_back_array) {
-                $this->log('Received wrong message type back instead of expected ' . $msg_type_back_array . ' we got :' . $msg_type, $data);
+                $this->log(__METHOD__.' Received wrong message type back instead of expected ' . $msg_type_back_array . ' we got :' . $msg_type, $data);
             }
             if (is_null($response)) {
-                $this->log('Empty receive:', $data);
+                $this->log(__METHOD__.' Null $response received:', $data);
             }
             return $data['array_status'] ?? null;
         } else {
-            $this->log('getPinArray did not receive msg back', ['data' => $data, 'response' => $response, 'error' => $error_code]);
-            $error_code .= '9999';
+            $this->log(__METHOD__. ' did not receive msg back', ['data' => $data, 'response' => $response, 'error' => $error_code]);
+            $error_code = $error_code ?? 9999;
             return null;
         }
 
@@ -172,7 +172,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function setArrayLow(array $pin_array, &$error_code=null) : ?bool
+    public function setArrayLow(array $pin_array, ?int &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'setArrayLow',
@@ -186,7 +186,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function setArrayHigh(array $pin_array, &$error_code=null) : ?bool
+    public function setArrayHigh(array $pin_array, ?int &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'setArrayHigh',
@@ -200,7 +200,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function setPinsBinary($value, $pin_array, &$error_code=null) : ?bool
+    public function setPinsBinary($value, $pin_array, ?int &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'setPinsBinary',
@@ -215,7 +215,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function flashBinary(int $value, array $pin_array, int $select_pin,  ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, &$error_code = null) : ?bool
+    public function flashBinary(int $value, array $pin_array, int $select_pin,  ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, ?int &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashBinary',
@@ -234,7 +234,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $off_count=0, ?int $period=1000000, ?bool $blocking=true, ?string &$error_code=null) : ?bool
+    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $off_count=0, ?int $period=1000000, ?bool $blocking=true, ?int &$error_code=null) : ?bool
     {
         $data = [
             'function' => 'strobeBinary',
@@ -254,7 +254,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, ?string &$error_code = null) : ?bool
+    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, ?int &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashPinHighLow',
@@ -272,7 +272,7 @@ class GPIOSysVClt implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $low_delay = 50000, ?int $high_delay = 50000, ?bool $blocking=true, ?string &$error_code = null) : ?bool
+    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $low_delay = 50000, ?int $high_delay = 50000, ?bool $blocking=true, ?int &$error_code = null) : ?bool
     {
         $data = [
             'function' => 'flashPinLowHigh',

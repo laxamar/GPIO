@@ -68,21 +68,22 @@ class GPIOSysVSrv implements GPIOSysVInterface
             while (msg_receive($seg, self::MSG_TYPE_GPIO, $msg_type, self::MSG_MAX_SIZE,
                     $data, true, 0, $error_code) )
             {
-                if ($this->debug) $this->log( 'Messages Received : ', $data );
+                // Clear alarm during processing
+                if ($this->debug) $this->log( __METHOD__.' Messages Received : ', $data );
                 // check for errors
                 if (!empty($error_code))
                 {
-                    $this->log('Error code :'.$error_code, $data);
+                    $this->log(__METHOD__.' Error code :'.$error_code, $data);
                     continue;
                 }
                 if ($msg_type != self::MSG_TYPE_GPIO)
                 {
-                    $this->log('Received wrong message type '.$msg_type, $data);
+                    $this->log(__METHOD__.' Received wrong message type '.$msg_type, $data);
                     continue;
                 }
                 if (empty($data['function']))
                 {
-                    $this->log('No function call received:', $data);
+                    $this->log(__METHOD__.' No function call received:', $data);
                     continue;
                 }
                 $function_call = $data['function'];
@@ -118,7 +119,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             break;
                         }
                         $pin_status = $this->getPin($pin_id, $error_code);
-                        $this->msg_back($data, ['pin_status' => $pin_status], $error_code);
+                        $this->msgBack($data, ['pin_status' => $pin_status], $error_code);
                         break;
                     case 'getPinArray':
                         $pin_array = $data['parms']['pin_array'] ?? null;
@@ -128,8 +129,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             break;
                         }
                         $array_status = $this->getPinArray($pin_array, $error_code);
-                        $this->log($function_call, ['data' => $data, 'status' => $array_status, 'error' => $error_code]);
-                        $this->msg_back($data, ['array_status' => $array_status], $error_code);
+                        $this->msgBack($data, ['array_status' => $array_status], $error_code);
                         break;
                     case 'setArrayLow':
                         $pin_array = $data['parms']['pin_array'] ?? [];
@@ -224,7 +224,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                     default:
                         // Log error
                         $success = false;
-                        $this->log('Received non existent function call type '.$function_call, $data);
+                        $this->log(__METHOD__.' Received non existent function call type '.$function_call, $data);
                         break;
                 }
                 if (!$success)
@@ -241,12 +241,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * Dispatch a data block through SysV to a server
      * @param array $data to be passed to server
      * @param array $response
-     * @param null $error_code msg_send error code if any
+     * @param int|null $error_code msg_send error code if any
      * @return bool
      */
-    protected function msg_back(array $data, array $response, &$error_code = null) : ?bool
+    protected function msgBack(array $data, array $response, ?int &$error_code = null) : ?bool
     {
-        $this->log('Sending MSG back', ['data' => $data, 'response' => $response]);
         $msg_queue_id = $data['parms']['msg_queue_id'] ?? self::MSG_BACK_ID;
         $msg_type     = $data['parms']['msg_type'] ?? self::MSG_BACK_GPIO;
         $seg          = msg_get_queue($msg_queue_id);
@@ -255,7 +254,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
         if (!$dispatch_success || !empty($response_error))
         {
             $error_code .= $response_error;
-            $this->log('Sending MSG back error: '.print_r($error_code,1), ['data' => $data, 'response' => $response]);
+            $this->log(__METHOD__.' Sending MSG back error: '.print_r($error_code,1), ['data' => $data, 'response' => $response]);
         }
         return $dispatch_success;
     }
@@ -264,10 +263,9 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinHigh(int $pin_id, ?string &$error_code = null) : ?bool
+    public function setPinHigh(int $pin_id, ?int &$error_code = null) : ?bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        // if ($this->debug) $this->Log('VALUE_HIGH:'.print_r(VALUE_HIGH,1));
         $pin->setValue(self::VALUE_HIGH);
         return true;
     }
@@ -275,17 +273,16 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setPinLow(int $pin_id, ?string &$error_code = null) : ?bool
+    public function setPinLow(int $pin_id, ?int &$error_code = null) : ?bool
     {
         $pin = $this->gpio_obj->getOutputPin($pin_id);
-        // if ($this->debug) $this->Log('VALUE_LOW:'.print_r(VALUE_LOW,1));
         return $pin->setValue(self::VALUE_LOW);
     }
 
     /**
      *  {@inheritdoc}
      */
-    public function getPin(int $pin_id, ?string &$error_code = null) : ?int
+    public function getPin(int $pin_id, ?int &$error_code = null) : ?int
     {
         $pin = $this->gpio_obj->getInputPin($pin_id);
         return $pin->getValue();
@@ -294,7 +291,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function getPinArray(array $pin_array, ?string &$error_code = null) : ?array
+    public function getPinArray(array $pin_array, ?int &$error_code = null) : ?array
     {
         $state = [];
         foreach ($pin_array as $pin_id)
@@ -308,7 +305,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setArrayLow(array $pin_array, ?string &$error_code = null) : ?bool
+    public function setArrayLow(array $pin_array, ?int &$error_code = null) : ?bool
     {
         foreach ($pin_array as $pin_id) {
             $this->setPinLow($pin_id);
@@ -319,7 +316,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      *  {@inheritdoc}
      */
-    public function setArrayHigh(array $pin_array, ?string &$error_code = null) : ?bool
+    public function setArrayHigh(array $pin_array, ?int &$error_code = null) : ?bool
     {
         foreach ($pin_array as $pin_id) {
             $this->setPinHigh($pin_id);
@@ -330,11 +327,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function setPinsBinary(int $value, array $pin_array, ?string &$error_code=null) : ?bool
+    public function setPinsBinary(int $value, array $pin_array, ?int &$error_code=null) : ?bool
     {
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
-        if ($this->debug) $this->log('setPinsBinary '.$value , $binary);
+        if ($this->debug) $this->log(__METHOD__.' '.$value , $binary);
         // $this->all_off($PIN_ARRAY);
         $return_status = true;
         for ($pos=0;$pos < $bits; $pos++) {
@@ -352,7 +349,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * {@inheritdoc}
      */
     public function flashBinary(int $value, array $pin_array, int $select_pin, ?int $high_delay = 50000, ?int $low_delay = 50000,
-                         ?bool $blocking=false, ?string &$error_code=null) : ?bool
+                         ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         $success = true;
         // set pin to turn off output
@@ -360,7 +357,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
         // Calculate binary pins
         $bits = sizeof($pin_array);
         $binary = str_split(sprintf('%0'.$bits.'b', $value),1);
-        if ($this->debug) $this->log('DEBUG: $binary'. print_r($binary,1) );
+        if ($this->debug) $this->log(__METHOD__.' $binary', $binary );
         for ($pos=0;$pos < $bits; $pos++) {
             // foreach ($binary as $pos => $bit)
             if ($binary[$pos] == 1) {
@@ -376,7 +373,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
      * {@inheritdoc}
      */
     public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $off_count=0, ? int $period=1000000,
-                         ?bool $blocking=false, ?string &$error_code=null) : ?bool
+                         ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         // set pin to turn off output
         $this->setPinLow($select_pin);
@@ -392,7 +389,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
             }
         }
         $delay = $period/($count+$off_count);
-        if ($this->debug) $this->log('D:'.$delay.' '.$value . ' => '. print_r($binary,1));
+        if ($this->debug) $this->log(__METHOD__.' D:'.$delay.' V:'.$value , $binary);
         return $this->flashPinHighLow($select_pin, $count, $delay/2, $delay/2, $error_code);
         // putting extra empty delay here??
         // usleep($empty * $delay);
@@ -401,7 +398,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=false, ?string &$error_code=null) : ?bool
+    public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $high_delay = 50000, ?int $low_delay = 50000,
+                                    ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         $return_status = true;
         for ($seq=1; $seq <= $count; $seq++)
@@ -417,7 +415,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $low_delay = 50000, ?int $high_delay = 50000, ?bool $blocking=false, ?string &$error_code=null) : ?bool
+    public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $low_delay = 50000, ?int $high_delay = 50000,
+                                    ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         $return_status = true;
         for ($seq=1; $seq <= $count; $seq++)
@@ -436,8 +435,25 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     public function cleanMsgQueue()
     {
-        $seg      = msg_get_queue(self::MSG_QUEUE_ID);
-        // TODO: loop and empty first
+        $seg = msg_get_queue(self::MSG_QUEUE_ID);
+        $mst = self::MSG_TYPE_GPIO;
+        $message = null;
+        $received_message_type = null;
+        $error_code = null;
+
+        while ( msg_receive(
+            $seg,
+            $mst,
+            $received_message_type,
+            self::MSG_MAX_SIZE,
+            $message,
+            true,
+            MSG_IPC_NOWAIT,
+            $error_code
+        ) )
+        {
+            if ($this->debug) $this->log(__METHOD__, ['msg_type' => $received_message_type, 'message' => $message]);
+        }
         msg_remove_queue($seg);
     }
 
