@@ -143,9 +143,13 @@ class GPIOSysVClt implements GPIOSysVInterface
         $seg = msg_get_queue($msg_queue_id);
         $stat = msg_stat_queue($seg);
         // TODO: Loop and Wait a reasonable amount of time before reading
-        if ($stat['msg_qnum'] > 0) {
-            msg_receive($seg, $msg_type_back_array, $msg_type, self::MSG_MAX_SIZE,
-                $response, true, 0, $error_code);
+        pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
+        // Set an alarm to wait for 1 second before checking for "still_running"
+        pcntl_alarm(1);
+
+        if ( msg_receive($seg, $msg_type_back_array, $msg_type, self::MSG_MAX_SIZE,
+                $response, true, 0, $error_code) )
+        {
             // check for errors
             if (!empty($error_code)) {
                 $this->log('Error code :' . $error_code, $data);
@@ -303,5 +307,24 @@ class GPIOSysVClt implements GPIOSysVInterface
         $this->debug = $set_debug;
         return $prev;
     }
+
+    /**
+     * signal handler for timeout Alarms
+     * Currently used for SIGALRM Only.
+     * The rest are here for show
+     */
+    function sigAlarmHandler (int $sigNo, array $sigInfo) : int {
+        // echo "Interrupt $sigNo :" . print_r($sigInfo, 1);
+        switch ($sigNo) {
+            case SIGALRM:
+                // stop msg_receive loop to check for still_running
+                break;
+            default:
+                // handle all other signals
+                break;
+        }
+        return 0;
+    }
+
 
 }
