@@ -170,6 +170,18 @@ class GPIOSysVClt implements GPIOSysVInterface
     }
 
     /**
+     * return a Decimal representation of the input PINs
+     * @param array $pin_array
+     * @param int|null $error_code
+     * @return int|null
+     */
+    public function getPinArrayDec(array $pin_array, ?int &$error_code=null) : ?int
+    {
+        $state = $this->getPinArray($pin_array, $error_code);
+        return bindec(implode(' ', array_reverse($state['array_status'])));
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function setArrayLow(array $pin_array, ?int &$error_code=null) : ?bool
