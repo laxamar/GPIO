@@ -15,8 +15,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
 {
     static private $instance;
     private $gpio_obj;
-    private $debug;
-    public  $still_running;
+    private bool $debug;
+    public bool $still_running;
     public const VALUE_LOW = 0;
     public const VALUE_HIGH = 1;
 

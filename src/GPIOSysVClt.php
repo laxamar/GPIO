@@ -11,7 +11,7 @@ namespace Amar\GPIOSysV;
 class GPIOSysVClt implements GPIOSysVInterface
 {
     static private $instance;
-    private $debug;
+    private bool $debug;
     const DEBUG_FILE = '/var/tmp/GPIOSysVClt.log';
 
     static public function getInstance()
@@ -96,30 +96,8 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'msg_type' => $msg_type_back,
             ]
         ];
-        $this->dispatch($data, $error_code);
-        // Now wait for the answer (OMG)
-        $seg = msg_get_queue($msg_queue_id);
-        $stat = msg_stat_queue($seg);
-        // TODO: Loop and Wait a reasonable amount of time before reading
-        if ($stat['msg_qnum'] > 0) {
-            msg_receive($seg, $msg_type_back, $msg_type, self::MSG_MAX_SIZE,
-                $response, true, 0, $error_code);
-            // check for errors
-            if (!empty($error_code)) {
-                $this->log(__METHOD__.' msg_receive() Error code :' . $error_code, $data);
-            }
-            if ($msg_type != $msg_type_back) {
-                $this->log(__METHOD__.' Received wrong message type back instead of expected ' . $msg_type_back . ' we got :' . $msg_type, $data);
-            }
-            if (is_null($response)) {
-                $this->log(__METHOD__.' Empty $response received:', $data);
-            }
-            return $data['pin_status'] ?? null;
-        } else {
-            $error_code = $error_code ?? 9999;
-            return null;
-        }
-
+        $result = $this->getPinMsg($data, $msg_queue_id, $msg_type_back, $error_code);
+        return $result['pin_status'] ?? null;
     }
 
     /**
@@ -138,11 +116,12 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'msg_type'     => $msg_type_back_array,
             ]
         ];
+        $result = $this->getPinMsg($data, $msg_queue_id, $msg_type_back_array, $error_code);
+        return $result['array_status'] ?? null;
+        /*
         $this->dispatch($data, $error_code);
         // Now wait for the answer (OMG)
         $seg = msg_get_queue($msg_queue_id);
-        // $stat = msg_stat_queue($seg);
-        // TODO: Loop and Wait a reasonable amount of time before reading
         pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
         // Set an alarm to wait for 1 second before checking for "still_running"
         pcntl_alarm(1);
@@ -163,7 +142,46 @@ class GPIOSysVClt implements GPIOSysVInterface
             return $response ?? null;
         } else {
             $this->log(__METHOD__. ' did not receive msg back', ['data' => $data, 'response' => $response, 'error' => $error_code]);
-            $error_code = $error_code ?? 9999;
+            $error_code ??= 9999;
+            return null;
+        }
+        */
+    }
+
+    /**
+     * @param array $data
+     * @param int $msg_queue_id
+     * @param int $msg_type_expect
+     * @param int|null $error_code
+     * @return mixed|null
+     */
+    private function getPinMsg(array $data, int $msg_queue_id, int $msg_type_expect, ?int &$error_code=null)
+    {
+        $this->dispatch($data, $error_code);
+        // Now wait for the answer (OMG)
+        $seg = msg_get_queue($msg_queue_id);
+        // Wait a reasonable amount of time before giving up
+        pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
+        // Set an alarm to wait for 1 second before checking for "still_running"
+        pcntl_alarm(1);
+
+        if ( msg_receive($seg, $msg_type_expect, $msg_type, self::MSG_MAX_SIZE,
+            $response, true, 0, $error_code) )
+        {
+            // check for errors
+            if (!empty($error_code)) {
+                $this->log(__METHOD__.' msg_receive() Error code :' . $error_code, $data);
+            }
+            if ($msg_type != $msg_type_expect) {
+                $this->log(__METHOD__.' Received wrong message type back instead of expected ' . $msg_type_expect . ' we got :' . $msg_type, $data);
+            }
+            if (is_null($response)) {
+                $this->log(__METHOD__.' Null $response received:', $data);
+            }
+            return $response;
+        } else {
+            $this->log(__METHOD__. ' did not receive msg back', ['data' => $data, 'response' => $response, 'error' => $error_code]);
+            $error_code ??= 9999;
             return null;
         }
 
@@ -308,6 +326,37 @@ class GPIOSysVClt implements GPIOSysVInterface
     {
         file_put_contents(self::DEBUG_FILE,$message.':'.print_r($data,1), FILE_APPEND | LOCK_EX );
     }
+
+    /**
+     * cleanMsgQueue Empty any remaining values in msg_queue and remove
+     */
+    public function cleanMsgQueue()
+    {
+        $seg = msg_get_queue(self::MSG_BACK_ID);
+        // $mst = self::MSG_TYPE_GPIO;
+        $message = null;
+        $received_message_type = null;
+        $error_code = null;
+
+        foreach ([self::MSG_BACK_GPIO, self::MSG_BACK_ARRAY] as $mst)
+        {
+            while ( msg_receive(
+                $seg,
+                $mst,
+                $received_message_type,
+                self::MSG_MAX_SIZE,
+                $message,
+                true,
+                MSG_IPC_NOWAIT,
+                $error_code
+            ) )
+            {
+                if ($this->debug) $this->log(__METHOD__, ['msg_type' => $received_message_type, 'message' => $message]);
+            }
+        }
+        msg_remove_queue($seg);
+    }
+
 
     /**
      * set the global object $debug
