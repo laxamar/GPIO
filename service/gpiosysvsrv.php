@@ -14,13 +14,14 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $lib_path);
 
 spl_autoload_register(function ($class_name) {
 
+    echo $class_name;
     $file_name = get_include_path()."/".$class_name . '.php';
     $file_name = str_replace("\\", "/", $file_name);
     if (file_exists($file_name)) {
         echo "Trying to include ".$file_name;
         require_once($file_name);
     } else {
-        echo "file not found";
+        echo "file '$file_name' not found\n";
     }
 });
 
