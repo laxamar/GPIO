@@ -35,6 +35,8 @@ use PiPHP\GPIO\Pin\OutputPin;
 // track errors to DEBUG file
 ini_set('error_log', GPIOSysVSrv::DEBUG_FILE);
 
+$gpio_obj = GPIOSysVSrv::getInstance();
+
 define('PID_FILE', "/run/" . basename($argv[0], ".php") . ".pid");
 
 // fork: a twin process is created
@@ -59,7 +61,6 @@ pcntl_signal(SIGHUP,  "sigHandler");
 pcntl_signal(SIGUSR1, "sigHandler");
 // DO NOT TAKE OVER SIGALRM!! Used internally by processQueue
 
-$gpio_obj = GPIOSysVSrv::getInstance();
 // $gpio_obj->setDebug(true);
 $gpio_obj->still_running = true;
 while ($gpio_obj->still_running) {
