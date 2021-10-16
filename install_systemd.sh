@@ -35,6 +35,6 @@ fi
 mkdir -p ${PACKAGE_PATH}
 cp -u service/* ${PACKAGE_PATH}
 cd ${PACKAGE_PATH}
-composer update
+# composer update should not be used here
 chmod +x ${PACKAGE_PATH}gpiosysvsrv.sh
 systemctl enable ${PACKAGE_PATH}gpiosysv.service
