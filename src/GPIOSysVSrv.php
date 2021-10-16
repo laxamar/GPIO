@@ -8,7 +8,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
 {
     static private $instance;
     private $gpio_obj;
-    private bool $debug;
+    private bool $debug = false;
     public bool $still_running;
     public const VALUE_LOW = 0;
     public const VALUE_HIGH = 1;
@@ -28,6 +28,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
             $_local_obj = new $this_class();
 
             $_local_obj->gpio_obj = new \PiPHP\GPIO\GPIO();
+            // Default debug off
+            // $_local_obj->debug = false;
 
             self::$instance = $_local_obj;
         }
