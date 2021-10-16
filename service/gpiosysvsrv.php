@@ -6,11 +6,23 @@
  * @copyright 2019-2021 Amar Micro Inc.
  */
 
-$lib_path = dirname(__FILE__). PATH_SEPARATOR . '..' . PATH_SEPARATOR .'.src';
+$lib_path = dirname(__FILE__). '/../src';
 set_include_path(get_include_path() . PATH_SEPARATOR . $lib_path);
 
 // Take off dependence on composer
 // require 'vendor/autoload.php';
+
+spl_autoload_register(function ($class_name) {
+
+    $file_name = get_include_path()."/".$class_name . '.php';
+    $file_name = str_replace("\\", "/", $file_name);
+    if (file_exists($file_name)) {
+        echo "Trying to include ".$file_name;
+        require_once($file_name);
+    } else {
+        echo "file not found";
+    }
+});
 
 use Amar\GPIOSysV\GPIOSysVSrv;
 use PiPHP\GPIO\FileSystem\FileSystem;
