@@ -33,7 +33,7 @@ use PiPHP\GPIO\Pin\InputPin;
 use PiPHP\GPIO\Pin\OutputPin;
 
 // track errors to DEBUG file
-ini_set('error_log', GPIOSysVSrv::DEBUG_FILE);
+ini_set('error_log', Amar\GPIOSysV\GPIOSysVSrv::DEBUG_FILE);
 
 $gpio_obj = GPIOSysVSrv::getInstance();
 
