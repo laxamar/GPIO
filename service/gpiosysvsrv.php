@@ -6,7 +6,11 @@
  * @copyright 2019-2021 Amar Micro Inc.
  */
 
-require 'vendor/autoload.php';
+$lib_path = dirname(__FILE__). PATH_SEPARATOR . '..' . PATH_SEPARATOR .'.src';
+set_include_path(get_include_path() . PATH_SEPARATOR . $lib_path);
+
+// Take off dependence on composer
+// require 'vendor/autoload.php';
 
 use Amar\GPIOSysV\GPIOSysVSrv;
 use PiPHP\GPIO\FileSystem\FileSystem;
@@ -15,6 +19,9 @@ use PiPHP\GPIO\Interrupt\InterruptWatcher;
 use PiPHP\GPIO\Pin\Pin;
 use PiPHP\GPIO\Pin\InputPin;
 use PiPHP\GPIO\Pin\OutputPin;
+
+// track errors to DEBUG file
+ini_set('error_log', GPIOSysVSrv::DEBUG_FILE);
 
 define('PID_FILE', "/run/" . basename($argv[0], ".php") . ".pid");
 

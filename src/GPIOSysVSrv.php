@@ -464,7 +464,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
      */
     private function log(string $message, ?array $data = null)
     {
-        file_put_contents(self::DEBUG_FILE, $message.':'.print_r($data,1), FILE_APPEND | LOCK_EX );
+        $date = date("Y-m-d H:i:s");
+        file_put_contents(self::DEBUG_FILE, $date.'|'.$message.':'.print_r($data,1), FILE_APPEND | LOCK_EX );
     }
 
     /**
