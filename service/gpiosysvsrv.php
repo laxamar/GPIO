@@ -10,8 +10,8 @@ $lib_path = dirname(__FILE__). '/../src';
 set_include_path(get_include_path() . PATH_SEPARATOR . $lib_path);
 
 $di = new RecursiveDirectoryIterator($lib_path);
-foreach (new RecursiveIteratorIterator($di) as $filename => $file) {
-    if ($file->isDir() && !$file->isDot() ) {
+foreach (new RecursiveIteratorIterator($di, FilesystemIterator::SKIP_DOTS) as $filename => $file) {
+    if ($file->isDir()  ) {
         set_include_path(get_include_path() . PATH_SEPARATOR . $filename);
     }
 }
