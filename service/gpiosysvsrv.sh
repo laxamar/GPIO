@@ -36,7 +36,7 @@ function stop() {
 }
 
 function start() {
-  echo "${PHP} ${CODEPATH}gpiosysvsrv.php"
+  # echo "${PHP} ${CODEPATH}gpiosysvsrv.php"
   cd ${CODEPATH}
   ${PHP} ${CODEPATH}gpiosysvsrv.php
 }
