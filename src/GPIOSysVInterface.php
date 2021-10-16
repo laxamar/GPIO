@@ -1,13 +1,6 @@
 <?php
 namespace Amar\GPIOSysV;
 
-// use PiPHP\GPIO\FileSystem\FileSystem;
-// use PiPHP\GPIO\FileSystem\FileSystemInterface;
-// use PiPHP\GPIO\Interrupt\InterruptWatcher;
-// use PiPHP\GPIO\Pin\Pin;
-// use PiPHP\GPIO\Pin\InputPin;
-// use PiPHP\GPIO\Pin\OutputPin;
-
 /**
  * GPIOSysV Interface class
  *  Defines the functions that both server and client must have and share
@@ -18,7 +11,7 @@ namespace Amar\GPIOSysV;
  *
  * @author 	Jacques Amar
  * @copyright (c) 2021	Amar Micro Inc.
- * @version	0.5
+ * @version	1.0
  */
 interface GPIOSysVInterface
 {
@@ -28,6 +21,16 @@ interface GPIOSysVInterface
     const MSG_BACK_GPIO  = 0x6474;
     const MSG_BACK_ARRAY = 0x6475;
     const MSG_MAX_SIZE = 2048;
+
+    /**
+     * Set pin in output mode with pin_value
+     * @param int $pin_id
+     * @param int $pin_value
+     * @param int|null $error_code
+     * @return bool|null
+     * @access public
+     */
+    public function setPin(int $pin_id, int $pin_value, ?int &$error_code=null) : ?bool;
 
     /**
      * Set pin in output mode - HIGH- Turn on any LEDs

@@ -3,13 +3,6 @@
 namespace Amar\GPIOSysV;
 
 use PiPHP\GPIO\GPIO;
-// use PiPHP\GPIO\FileSystem\FileSystem;
-// use PiPHP\GPIO\FileSystem\FileSystemInterface;
-// use PiPHP\GPIO\Interrupt\InterruptWatcher;
-// use PiPHP\GPIO\Pin\PinInterface;
-// use PiPHP\GPIO\Pin\Pin;
-// use PiPHP\GPIO\Pin\InputPin;
-// use PiPHP\GPIO\Pin\OutputPin;
 
 class GPIOSysVSrv implements GPIOSysVInterface
 {
@@ -93,6 +86,16 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 $success    = true;
                 switch ( $function_call )
                 {
+                    case 'setPin':
+                        $pin_id    = $data['parms']['pin_id'] ?? null;
+                        $pin_value = $data['parms']['pin_value'] ?? null;
+                        if (empty($pin_id) || is_null($pin_value)) {
+                            $success = false;
+                            $this->log($function_call.' with empty pin_id or pin_value', $data);
+                            break;
+                        }
+                        $success &= $this->setPin($pin_id, $pin_value, $error_code);
+                        break;
                     case 'setPinHigh':
                         $pin_id = $data['parms']['pin_id'] ?? null;
                         if (empty($pin_id)) {
@@ -259,6 +262,15 @@ class GPIOSysVSrv implements GPIOSysVInterface
         return $dispatch_success;
     }
 
+    /**
+     *  {@inheritdoc}
+     */
+    public function setPin(int $pin_id, int $pin_value, ?int &$error_code=null) : ?bool
+    {
+        $pin = $this->gpio_obj->getOutputPin($pin_id);
+        $pin->setValue($pin_value);
+        return true;
+    }
 
     /**
      *  {@inheritdoc}

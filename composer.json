@@ -1,7 +1,7 @@
 {
     "name": "laxamar/gpiosysv",
-    "description": "A library for accessing the GPIO pins on a Raspberry Pi using SysV message queue and client/server model",
-    "keywords": ["gpio", "pi", "raspberry", "pin", "pins", "sysv"],
+    "description": "A library for accessing the GPIO pins on a Raspberry Pi without root for clients using SysV message queue and client/server",
+    "keywords": ["gpio", "pi", "raspberry", "pin", "pins", "sysv", "no-root"],
     "license": "MIT",
     "authors": [
         {

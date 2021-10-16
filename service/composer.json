@@ -8,14 +8,13 @@
     "require": {
         "php": "^7.4||^8.0",
         "laxamar/gpiosysv": "*",
-        "piphp/gpio": "*",
         "ext-sysvmsg": "*",
         "ext-pcntl": "*"
     },
     "autoload": {
         "psr-4": {
             "Amar\\GPIOSysV\\": "laxamar/gpiosysv/src",
-            "PiPHP\\GPIO\\": "piphp/gpio/src"
+            "PiPHP\\GPIO\\": "laxamar/gpiosysv/src"
         }
     }
 }
