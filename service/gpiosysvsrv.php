@@ -11,11 +11,12 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $lib_path);
 
 $di = new RecursiveDirectoryIterator($lib_path);
 foreach (new RecursiveIteratorIterator($di) as $filename => $file) {
-    if ($file->isDir) {
+    if ($file->isDir()) {
         set_include_path(get_include_path() . PATH_SEPARATOR . $filename);
     }
 }
 
+echo "path :".get_include_path()."\n";
 // Take off dependence on composer
 // require 'vendor/autoload.php';
 
