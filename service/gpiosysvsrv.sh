@@ -49,7 +49,6 @@ function status() {
 
 case "$1" in
     start)
-	stop
 	start
 	RETVAL=$?
 	;;
