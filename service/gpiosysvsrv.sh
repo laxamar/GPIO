@@ -6,6 +6,7 @@
 #
 # description:	Starts, stops and saves iptables firewall
 #
+# Should be set to executable
 
 # Fixed Files
 PHP=/usr/bin/php
