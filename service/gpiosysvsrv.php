@@ -32,10 +32,11 @@ use PiPHP\GPIO\Pin\Pin;
 use PiPHP\GPIO\Pin\InputPin;
 use PiPHP\GPIO\Pin\OutputPin;
 
-// track errors to DEBUG file
-ini_set('error_log', Amar\GPIOSysV\GPIOSysVSrv::DEBUG_FILE);
-
 $gpio_obj = GPIOSysVSrv::getInstance();
+
+// track errors to DEBUG file
+ini_set('error_log', GPIOSysVSrv::DEBUG_FILE);
+
 
 define('PID_FILE', "/run/" . basename($argv[0], ".php") . ".pid");
 
