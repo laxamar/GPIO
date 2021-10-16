@@ -16,16 +16,11 @@ foreach (new RecursiveIteratorIterator($di, FilesystemIterator::SKIP_DOTS) as $f
     }
 }
 
-echo "path :".get_include_path()."\n";
 // Take off dependence on composer
 // require 'vendor/autoload.php';
 
 spl_autoload_register(function ($class_name) {
-
     $class_leaf = substr(strrchr($class_name, '\\'), 1).'.php';
-    echo $class_name.'|'.$class_leaf."\n";
-    // $file_name = get_include_path()."/".$class_name . '.php';
-    // $file_name = str_replace("\\", "/", $file_name);
     require_once($class_leaf);
 });
 
