@@ -1,17 +1,18 @@
 # Amar: GPIOSysV
 
-[![License](https://poser.pugx.org/piphp/gpio/license)](https://packagist.org/packages/piphp/gpio)
+[![License](https://poser.pugx.org/laxamar/gpiosysv/license)](https://packagist.org/packages/laxamar/gpiosysv)
 [![Total Downloads](https://poser.pugx.org/laxamar/gpiosysv/downloads)](https://packagist.org/packages/laxamar/gpiosysv)
 
 A userland (non-root) library for low level access to the GPIO pins on a Raspberry Pi. These pins can be used to control outputs (LEDs, motors, valves, pumps) or read inputs (sensors).
 
 Adapted by [laxamar ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/laxamar)
-## Installing
 
 From [AndrewCarterUK ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/AndrewCarterUK)
 
-This release has two components. A server that can be installed via git orcomposer. A client that uses composer to install and run.
+## Installing
+This release has two components. A server that can be installed via git or composer. A client that uses composer to install and run.
 
+### Client (with server as a service with manual installation)
 Using [composer](https://getcomposer.org/):
 
 `composer require laxamar/gpiosysv`
@@ -19,6 +20,13 @@ Using [composer](https://getcomposer.org/):
 Or:
 
 `php composer.phar require laxamar/gpiosysv`
+
+The server code is installed in the ```vendors/laxamar/gpiosysv``` directory of composer under the ```service``` directory and can be installed as below
+
+### Server
+The server can be downloaded as by git 
+```sudo install_systemd.sh```
+will install the necessary files in /usr/local/GPIOSysV and install the systemd service
 
 ## Examples
 
