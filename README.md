@@ -3,13 +3,14 @@
 [![License](https://poser.pugx.org/piphp/gpio/license)](https://packagist.org/packages/piphp/gpio)
 [![Total Downloads](https://poser.pugx.org/laxamar/gpiosysv/downloads)](https://packagist.org/packages/laxamar/gpiosysv)
 
-A library for low level access to the GPIO pins on a Raspberry Pi. These pins can be used to control outputs (LEDs, motors, valves, pumps) or read inputs (sensors).
+A userland (non-root) library for low level access to the GPIO pins on a Raspberry Pi. These pins can be used to control outputs (LEDs, motors, valves, pumps) or read inputs (sensors).
 
 Adapted by [laxamar ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/laxamar)
 ## Installing
 
 From [AndrewCarterUK ![(Twitter)](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/AndrewCarterUK)
 
+This release has two components. A server that can be installed via git orcomposer. A client that uses composer to install and run.
 
 Using [composer](https://getcomposer.org/):
 
@@ -32,35 +33,26 @@ $gpio_obj = GPIOSysVClt::getInstance();
 $success = $gpio_obj->setPinHigh(18);
 
 $success = $gpio_obj->setPinLow(18);
+
+// Set a series on PINs using BCD
+$gpio->setPinsBinary($board, CS_PINs);
+for ($dec = 0; $dec < 8; $dec++) {
+    // echo "Decimal $dec";
+    $gpio->strobeBinary($dec, LED_PINs, FLASH_PIN, 1, 0, $frequency, true, $error);
+}
+
 ```
 
-### Input Pin Interrupts
+### Input Pin
 ```php
-use PiPHP\GPIO\GPIO;
-use PiPHP\GPIO\Pin\InputPinInterface;
+use Amar\GPIOSysV\GPIOSysVClt;
 
 // Create a GPIO object
-$gpio = new GPIO();
+$gpio_obj = GPIOSysVClt::getInstance();
 
-// Retrieve pin 18 and configure it as an input pin
-$pin = $gpio->getInputPin(18);
+// Set the value of the pin high (turn it on)
+$value = $gpio_obj->getPin(4);
 
-// Configure interrupts for both rising and falling edges
-$pin->setEdge(InputPinInterface::EDGE_BOTH);
-
-// Create an interrupt watcher
-$interruptWatcher = $gpio->createWatcher();
-
-// Register a callback to be triggered on pin interrupts
-$interruptWatcher->register($pin, function (InputPinInterface $pin, $value) {
-    echo 'Pin ' . $pin->getNumber() . ' changed to: ' . $value . PHP_EOL;
-
-    // Returning false will make the watcher return false immediately
-    return true;
-});
-
-// Watch for interrupts, timeout after 5000ms (5 seconds)
-while ($interruptWatcher->watch(5000));
 ```
 
 ## Further Reading
