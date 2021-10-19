@@ -14,7 +14,17 @@ class GPIOSysVSrv implements GPIOSysVInterface
     public const VALUE_HIGH = 1;
 
     const DEBUG_FILE = '/var/tmp/GPIOSysVSrv.log';
-
+    const PIN_FILTER_OPTIONS = [
+        'options' => [
+            'min_range' => 1,
+            'max_range' => 40
+        ]
+    ];
+    const VALUE_FILTER_OPTIONS = [
+        'options' => [
+            'min_range' => 0
+        ]
+    ];
 
     /**
      * Singleton object to handle all pins
@@ -91,7 +101,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
                     case 'setPin':
                         $pin_id    = $data['parms']['pin_id'] ?? null;
                         $pin_value = $data['parms']['pin_value'] ?? null;
-                        if (empty($pin_id) || is_null($pin_value)) {
+
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE ||
+                            filter_var( $pin_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE
+                        )
+                        {
                             $success = false;
                             $this->log($function_call.' with empty pin_id or pin_value', $data);
                             break;
@@ -100,7 +114,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'setPinHigh':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        if (empty($pin_id)) {
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
@@ -109,7 +124,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'setPinLow':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        if (empty($pin_id)) {
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
@@ -118,7 +134,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'getPin':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        if (empty($pin_id)) {
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
@@ -128,7 +145,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'getPinArray':
                         $pin_array = $data['parms']['pin_array'] ?? null;
-                        if (empty($pin_array)) {
+                        if (empty($pin_array))
+                        {
                             $success = false;
                             $this->log($function_call. ' with empty array', $data);
                             break;
@@ -138,7 +156,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'setArrayLow':
                         $pin_array = $data['parms']['pin_array'] ?? [];
-                        if (empty($pin_array)) {
+                        if (empty($pin_array))
+                        {
                             $success = false;
                             $this->log($function_call. ' with empty array', $data);
                             break;
@@ -147,7 +166,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'setArrayHigh':
                         $pin_array = $data['parms']['pin_array'] ?? [];
-                        if (empty($pin_array)) {
+                        if (empty($pin_array))
+                        {
                             $success = false;
                             $this->log($function_call. ' with empty array', $data);
                             break;
@@ -157,7 +177,9 @@ class GPIOSysVSrv implements GPIOSysVInterface
                     case 'setPinsBinary':
                         $dec_value = $data['parms']['value'] ?? null;
                         $pin_array = $data['parms']['pin_array'] ?? [];
-                        if (is_null($dec_value) || empty($pin_array))
+                        if( filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE ||
+                            empty($pin_array)
+                        )
                         {
                             $success = false;
                             $this->log($function_call. ' with empty values', $data);
@@ -169,9 +191,13 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $dec_value  = $data['parms']['value'] ?? null;
                         $pin_array  = $data['parms']['pin_array'] ?? [];
                         $select_pin = $data['parms']['select_pin'] ?? null;
+                        $select_dir = $data['parms']['select_dir'] ?? null;
                         $high_delay = $data['parms']['high_delay'] ?? null;
                         $low_delay  = $data['parms']['low_delay'] ?? null;
-                        if (is_null($dec_value) || empty($pin_array) || empty($select_pin))
+                        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE ||
+                            filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE ||
+                            empty($pin_array)
+                        )
                         {
                             $success = false;
                             $this->log($function_call. ' with empty values', $data);
@@ -180,6 +206,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $success &= $this->flashBinary($dec_value,
                             $pin_array,
                             $select_pin,
+                            $select_dir,
                             $high_delay,
                             $low_delay,
                             $no_blocking,
@@ -192,7 +219,10 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $count      = $data['parms']['count'] ?? null;
                         $off_count  = $data['parms']['off_count'] ?? null;
                         $period     = $data['parms']['period'] ?? null;
-                        if (is_null($dec_value) || empty($pin_array) || empty($select_pin))
+                        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE ||
+                            filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE ||
+                            empty($pin_array)
+                        )
                         {
                             $success = false;
                             $this->log($function_call. ' with empty values', $data);
@@ -205,7 +235,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $count     = $data['parms']['count'] ?? null;
                         $high_delay  = $data['parms']['high_delay'] ?? null;
                         $low_delay = $data['parms']['low_delay'] ?? null;
-                        if (empty($pin_id)) {
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
@@ -218,7 +249,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $count     = $data['parms']['count'] ?? null;
                         $on_delay  = $data['parms']['on_delay'] ?? null;
                         $off_delay = $data['parms']['off_delay'] ?? null;
-                        if (empty($pin_id)) {
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
                             break;
@@ -362,7 +394,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
     /**
      * {@inheritdoc}
      */
-    public function flashBinary(int $value, array $pin_array, int $select_pin, ?int $high_delay = 50000, ?int $low_delay = 50000,
+    public function flashBinary(int $value, array $pin_array, int $select_pin, ?int $select_dir=0, ?int $high_delay = 50000, ?int $low_delay = 50000,
                          ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         $success = true;
@@ -380,13 +412,18 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 $success &= $this->setPinLow($pin_array[$bits-$pos-1], $error_code);
             }
         }
-        return $this->flashPinHighLow($select_pin, 1, $high_delay, $low_delay, $blocking, $error_code);
+        if ($select_dir == 0)
+        {
+            return $this->flashPinHighLow($select_pin, 1, $high_delay, $low_delay, $blocking, $error_code);
+        } else {
+            return $this->flashPinLowHigh($select_pin, 1, $high_delay, $low_delay, $blocking, $error_code);
+        }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $off_count=0, ? int $period=1000000,
+    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $select_dir=0,  ?int $count=1, ?int $off_count=0, ? int $period=1000000,
                          ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         // set pin to turn off output
@@ -404,7 +441,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
         }
         $delay = $period/($count+$off_count);
         if ($this->debug) $this->log(__METHOD__.' D:'.$delay.' V:'.$value , $binary);
-        return $this->flashPinHighLow($select_pin, $count, $delay/2, $delay/2, $error_code);
+        if (empty($select_dir)) {
+            return $this->flashPinHighLow($select_pin, $count, $delay/2, $delay/2, $error_code);
+        } else {
+            return $this->flashPinLowHigh($select_pin, $count, $delay/2, $delay/2, $error_code);
+        }
         // putting extra empty delay here??
         // usleep($empty * $delay);
     }

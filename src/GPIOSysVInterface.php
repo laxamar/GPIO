@@ -101,6 +101,7 @@ interface GPIOSysVInterface
      * @param int $value - the decimal value to change to binary and map to pins
      * @param array	$pin_array	The list GPIO Pin IDs used
      * @param int $select_pin the controlling pin that flashes all
+     * @param int $select_dir the controlling pin goes 0=>High/Low or 1=>Low/High
      * @param int|null $high_delay how long HIGH status will last (in useconds)
      * @param int|null $low_delay how long LOW status will last (in useconds)
      * @param bool|null $blocking block the caller function to allow for proper timing between client/server
@@ -108,13 +109,14 @@ interface GPIOSysVInterface
      * @return bool|null
      * @access 	public
      */
-    public function flashBinary(int $value, array $pin_array, int $select_pin, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=false, ?int &$error_code=null) : ?bool;
+    public function flashBinary(int $value, array $pin_array, int $select_pin, ?int $select_dir=0, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=false, ?int &$error_code=null) : ?bool;
 
     /**
      * Strobe a BCD array multiple times
      * @param int $value to be BCD coded and strobed
      * @param array	$pin_array	The GPIO Pin ID used
      * @param int $select_pin the controlling pin that will do the strobing
+     * @param int|null $select_dir the direction of the flash 0-> High/Low 1->Low/High
      * @param int|null $count the number of times to strobe up during $period
      * @param int|null $off_count extra amount of off time for better timing after the strobe during $period
      * @param int|null $period time in useconds that the whole sequence of strobe on/off and empty wait will take place
@@ -123,7 +125,7 @@ interface GPIOSysVInterface
      * @return bool|null
      * @access 	public
      */
-    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $count=1, ?int $off_count=1, ?int $period=1000000, ?bool $blocking=false, ?int &$error_code=null) : ?bool;
+    public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $select_dir=0, ?int $count=1, ?int $off_count=1, ?int $period=1000000, ?bool $blocking=false, ?int &$error_code=null) : ?bool;
 
     /**
      * Flash a pin (HIGH then LOW) instead of turning it simply on/off
