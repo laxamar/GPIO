@@ -364,12 +364,14 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 $this->setPinLow($pin_array[$bits-$pos-1], $error_code);
             }
         }
-        $delay = $period/($count+$off_count);
+        // $delay     = $period/($count+$off_count);
+        $on_delay  = $period*$count/($count+$off_count);
+        $off_delay = $period*$off_count/($count+$off_count);
         if ($this->debug) $this->log(__METHOD__.' D:'.$delay.' V:'.$value , $binary);
         if (empty($select_dir)) {
-            return $this->flashPinHighLow($select_pin, $count, $delay/2, $delay/2, $error_code);
+            return $this->flashPinHighLow($select_pin, $count, $on_delay, $off_delay, $error_code);
         } else {
-            return $this->flashPinLowHigh($select_pin, $count, $delay/2, $delay/2, $error_code);
+            return $this->flashPinLowHigh($select_pin, $count, $on_delay, $off_delay, $error_code);
         }
         // putting extra empty delay here??
         // usleep($empty * $delay);
