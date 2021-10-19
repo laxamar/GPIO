@@ -162,10 +162,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $dec_value = $data['parms']['value'] ?? null;
                             $pin_array = $data['parms']['pin_array'] ?? [];
                             $select_pin = $data['parms']['select_pin'] ?? null;
+                            $select_dir = $data['parms']['select_dir'] ?? null;
                             $count = $data['parms']['count'] ?? null;
                             $off_count = $data['parms']['off_count'] ?? null;
                             $period = $data['parms']['period'] ?? null;
-                            $success &= $this->strobeBinary($dec_value, $pin_array, $select_pin, $count, $off_count, $period, $no_blocking, $error_code);
+                            $success &= $this->strobeBinary($dec_value, $pin_array, $select_pin, $select_dir, $count, $off_count, $period, $no_blocking, $error_code);
                             break;
                         case 'flashPinHighLow':
                             $pin_id = $data['parms']['pin_id'] ?? null;
