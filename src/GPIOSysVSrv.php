@@ -109,81 +109,37 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $pin_id = $data['parms']['pin_id'] ?? null;
                             $pin_value = $data['parms']['pin_value'] ?? null;
 
-                            if (filter_var($pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false ||
-                                filter_var($pin_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS) === false
-                            ) {
-                                $success = false;
-                                $this->log($function_call . ' with empty pin_id or pin_value', $data);
-                                break;
-                            }
                             $success &= $this->setPin($pin_id, $pin_value, $error_code);
                             break;
                         case 'setPinHigh':
                             $pin_id = $data['parms']['pin_id'] ?? null;
-                            if (filter_var($pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty pin_id', $data);
-                                break;
-                            }
                             $success &= $this->setPinHigh($pin_id, $error_code);
                             break;
                         case 'setPinLow':
                             $pin_id = $data['parms']['pin_id'] ?? null;
-                            if (filter_var($pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty pin_id', $data);
-                                break;
-                            }
                             $success &= $this->setPinLow($pin_id, $error_code);
                             break;
                         case 'getPin':
                             $pin_id = $data['parms']['pin_id'] ?? null;
-                            if (filter_var($pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty pin_id', $data);
-                                break;
-                            }
                             $pin_status = $this->getPin($pin_id, $error_code);
                             $this->msgBack($data, ['pin_status' => $pin_status], $error_code);
                             break;
                         case 'getPinArray':
                             $pin_array = $data['parms']['pin_array'] ?? null;
-                            if (filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty array', $data);
-                                break;
-                            }
                             $array_status = $this->getPinArray($pin_array, $error_code);
                             $this->msgBack($data, ['array_status' => $array_status], $error_code);
                             break;
                         case 'setArrayLow':
                             $pin_array = $data['parms']['pin_array'] ?? [];
-                            if (filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty array', $data);
-                                break;
-                            }
                             $success &= $this->setArrayLow($pin_array, $error_code);
                             break;
                         case 'setArrayHigh':
                             $pin_array = $data['parms']['pin_array'] ?? [];
-                            if (filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty array', $data);
-                                break;
-                            }
                             $success &= $this->setArrayHigh($pin_array, $error_code);
                             break;
                         case 'setPinsBinary':
                             $dec_value = $data['parms']['value'] ?? null;
                             $pin_array = $data['parms']['pin_array'] ?? [];
-                            if (filter_var($dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS) === false ||
-                                empty($pin_array)
-                            ) {
-                                $success = false;
-                                $this->log($function_call . ' with empty values', $data);
-                                break;
-                            }
                             $success &= $this->setPinsBinary($dec_value, $pin_array, $error_code);
                             break;
                         case 'flashBinary':
@@ -193,14 +149,6 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $select_dir = $data['parms']['select_dir'] ?? null;
                             $high_delay = $data['parms']['high_delay'] ?? null;
                             $low_delay = $data['parms']['low_delay'] ?? null;
-                            if (filter_var($select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false ||
-                                filter_var($dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS) === false ||
-                                empty($pin_array)
-                            ) {
-                                $success = false;
-                                $this->log($function_call . ' with empty values', $data);
-                                break;
-                            }
                             $success &= $this->flashBinary($dec_value,
                                 $pin_array,
                                 $select_pin,
@@ -217,14 +165,6 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $count = $data['parms']['count'] ?? null;
                             $off_count = $data['parms']['off_count'] ?? null;
                             $period = $data['parms']['period'] ?? null;
-                            if (filter_var($select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false ||
-                                filter_var($dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS) === false ||
-                                empty($pin_array)
-                            ) {
-                                $success = false;
-                                $this->log($function_call . ' with empty values', $data);
-                                break;
-                            }
                             $success &= $this->strobeBinary($dec_value, $pin_array, $select_pin, $count, $off_count, $period, $no_blocking, $error_code);
                             break;
                         case 'flashPinHighLow':
@@ -232,26 +172,14 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $count = $data['parms']['count'] ?? null;
                             $high_delay = $data['parms']['high_delay'] ?? null;
                             $low_delay = $data['parms']['low_delay'] ?? null;
-                            if (filter_var($pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty pin_id', $data);
-                                break;
-                            }
                             $success &= $this->flashPinHighLow($pin_id, $count, $high_delay, $low_delay, $no_blocking, $error_code);
-
                             break;
                         case 'flashPinLowHigh':
                             $pin_id = $data['parms']['pin_id'] ?? null;
                             $count = $data['parms']['count'] ?? null;
                             $on_delay = $data['parms']['on_delay'] ?? null;
                             $off_delay = $data['parms']['off_delay'] ?? null;
-                            if (filter_var($pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS) === false) {
-                                $success = false;
-                                $this->log($function_call . ' with empty pin_id', $data);
-                                break;
-                            }
                             $success &= $this->flashPinLowHigh($pin_id, $count, $on_delay, $off_delay, $no_blocking, $error_code);
-
                             break;
                         default:
                             // Log error
