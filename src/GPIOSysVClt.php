@@ -62,13 +62,6 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function setPin(int $pin_id, int $pin_value, ?int &$error_code = null) : ?bool
     {
-        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ||
-            filter_var( $pin_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false
-        ) {
-            $this->log(__METHOD__.' with empty pin_id or pin_value');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
         $data = [
             'function' => 'setPin',
             'parms'    => [
@@ -76,6 +69,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'pin_value' => $pin_value
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         return $this->dispatch($data, $error_code);
     }
 
@@ -84,17 +82,17 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function setPinHigh(int $pin_id, ?int &$error_code = null) : ?bool
     {
-        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ) {
-            $this->log(__METHOD__.' with empty pin_id');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
         $data = [
             'function' => 'setPinHigh',
             'parms'    => [
                 'pin_id' => $pin_id
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         return $this->dispatch($data, $error_code);
     }
 
@@ -103,17 +101,17 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function setPinLow(int $pin_id, ?int &$error_code = null) : ?bool
     {
-        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ) {
-            $this->log(__METHOD__.' with empty pin_id');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
         $data = [
             'function' => 'setPinLow',
             'parms'    => [
                 'pin_id' => $pin_id
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         return $this->dispatch($data, $error_code);
     }
 
@@ -122,12 +120,6 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function getPin(int $pin_id, ?int &$error_code=null) : ?int
     {
-        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ) {
-            $this->log(__METHOD__.' with empty pin_id');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
-
         $msg_queue_id = self::MSG_BACK_ID;
         $msg_type_back = self::MSG_BACK_GPIO; // TODO: add a unique number
 
@@ -139,6 +131,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'msg_type' => $msg_type_back,
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         $result = $this->getPinMsg($data, $msg_queue_id, $msg_type_back, $error_code);
         return $result['pin_status'] ?? null;
     }
@@ -164,6 +161,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'msg_type'     => $msg_type_back_array,
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return null;
+        }
         $result = $this->getPinMsg($data, $msg_queue_id, $msg_type_back_array, $error_code);
         return $result['array_status'] ?? null;
     }
@@ -224,18 +226,17 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function setArrayLow(array $pin_array, ?int &$error_code=null) : ?bool
     {
-        if (empty($pin_array)) {
-            $this->log(__METHOD__.' with empty pin_array');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
-
         $data = [
             'function' => 'setArrayLow',
             'parms'    => [
                 'pin_array' => $pin_array
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         return $this->dispatch($data, $error_code);
     }
 
@@ -244,17 +245,17 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function setArrayHigh(array $pin_array, ?int &$error_code=null) : ?bool
     {
-        if (empty($pin_array)) {
-            $this->log(__METHOD__.' with empty pin_array');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
         $data = [
             'function' => 'setArrayHigh',
             'parms'    => [
                 'pin_array' => $pin_array
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         return $this->dispatch($data, $error_code);
     }
 
@@ -263,14 +264,6 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function setPinsBinary(int $value, array $pin_array, ?int &$error_code=null) : ?bool
     {
-        if( filter_var( $value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false ||
-            empty($pin_array)
-        ) {
-            $this->log(__METHOD__.' with invalid $value or empty $pin_array', ['$value' => $value, '$pin_array' => $pin_array]);
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
-
         $data = [
             'function' => 'setPinsBinary',
             'parms'    => [
@@ -278,6 +271,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'pin_array' => $pin_array
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         return $this->dispatch($data, $error_code);
     }
 
@@ -286,15 +284,6 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function flashBinary(int $value, array $pin_array, int $select_pin,  ?int $select_dir=0, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, ?int &$error_code = null) : ?bool
     {
-        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ||
-            filter_var( $value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false ||
-            empty($pin_array)
-        ) {
-            $this->log(__METHOD__.' with empty values');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-
-        }
         $data = [
             'function' => 'flashBinary',
             'parms'    => [
@@ -306,6 +295,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'low_delay'  => $low_delay
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         $block_time = $blocking ? ($high_delay+$low_delay) : null;
         return $this->dispatch($data, $error_code, $block_time);
     }
@@ -315,15 +309,6 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function strobeBinary(int $value, array $pin_array, int $select_pin, ?int $select_dir=0, ?int $count=1, ?int $off_count=0, ?int $period=1000000, ?bool $blocking=true, ?int &$error_code=null) : ?bool
     {
-        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ||
-            filter_var( $value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false ||
-            empty($pin_array)
-        ) {
-            $this->log(__METHOD__.' with empty values', ['$value' => $value, '$pin_array' => $pin_array, '$select_pin' => $select_pin]);
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-
-        }
         $data = [
             'function' => 'strobeBinary',
             'parms'    => [
@@ -336,6 +321,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'period'     => $period
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         $block_time = $blocking ? $count*$period : null;
         return $this->dispatch($data, $error_code, $block_time);
     }
@@ -345,13 +335,6 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function flashPinHighLow(int $pin_id, ?int $count = 1, ?int $high_delay = 50000, ?int $low_delay = 50000, ?bool $blocking=true, ?int &$error_code = null) : ?bool
     {
-        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false )
-        {
-            $this->log(__METHOD__.' with empty pin_id');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
-
         $data = [
             'function' => 'flashPinHighLow',
             'parms'    => [
@@ -361,6 +344,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'low_delay' => $low_delay
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         $block_time = $blocking ? $count*($high_delay+$low_delay) : null;
         return $this->dispatch($data, $error_code, $block_time);
     }
@@ -370,12 +358,6 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $low_delay = 50000, ?int $high_delay = 50000, ?bool $blocking=true, ?int &$error_code = null) : ?bool
     {
-        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false )
-        {
-            $this->log(__METHOD__.' with empty pin_id');
-            $error_code = 9999; // TODO: Better error codes
-            return false;
-        }
         $data = [
             'function' => 'flashPinLowHigh',
             'parms'    => [
@@ -385,6 +367,11 @@ class GPIOSysVClt implements GPIOSysVInterface
                 'high_delay' => $high_delay
             ]
         ];
+        if ( filter_var_array($data['parms'], self::ARRAY_FILTER_OPTIONS) === false ) {
+            $this->log(__METHOD__ . ' with invalid values', $data);
+            $error_code = 9999;
+            return false;
+        }
         $block_time = $blocking ? $count*($low_delay+$high_delay) : null;
         return $this->dispatch($data, $error_code, $block_time);
     }

@@ -22,6 +22,34 @@ interface GPIOSysVInterface
     const MSG_BACK_ARRAY = 0x6475;
     const MSG_MAX_SIZE = 2048;
 
+    const ARRAY_FILTER_OPTIONS = [
+        'pin_id'     => [
+            'filter' => FILTER_VALIDATE_INT,
+            'flags'    => FILTER_REQUIRE_SCALAR,
+            'options' => array('min_range' => 1, 'max_range' => 40)
+        ],
+        'pin_value' => [
+            'filter' => FILTER_VALIDATE_INT,
+            'flags'    => FILTER_REQUIRE_SCALAR,
+            'options' => array('min_range' => 0)
+        ],
+        'value' => [
+            'filter' => FILTER_VALIDATE_INT,
+            'options' => array('min_range' => 0)
+        ],
+        'pin_array' => [
+            'filter'   => FILTER_VALIDATE_INT,
+            'flags'    => FILTER_REQUIRE_ARRAY || FILTER_REQUIRE_SCALAR,
+            'options' => array('min_range' => 1, 'max_range' => 40)
+        ],
+        'select_pin' => [
+            'filter' => FILTER_VALIDATE_INT,
+            'flags'    => FILTER_REQUIRE_SCALAR,
+            'options' => array('min_range' => 1, 'max_range' => 40)
+        ]
+    ];
+
+
     /**
      * Set pin in output mode with pin_value
      * @param int $pin_id
@@ -101,7 +129,7 @@ interface GPIOSysVInterface
      * @param int $value - the decimal value to change to binary and map to pins
      * @param array	$pin_array	The list GPIO Pin IDs used
      * @param int $select_pin the controlling pin that flashes all
-     * @param int $select_dir the controlling pin goes 0=>High/Low or 1=>Low/High
+     * @param int|null $select_dir the controlling pin goes 0=>High/Low or 1=>Low/High
      * @param int|null $high_delay how long HIGH status will last (in useconds)
      * @param int|null $low_delay how long LOW status will last (in useconds)
      * @param bool|null $blocking block the caller function to allow for proper timing between client/server
