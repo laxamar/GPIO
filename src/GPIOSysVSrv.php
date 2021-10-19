@@ -102,8 +102,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $pin_id    = $data['parms']['pin_id'] ?? null;
                         $pin_value = $data['parms']['pin_value'] ?? null;
 
-                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE ||
-                            filter_var( $pin_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ||
+                            filter_var( $pin_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false
                         )
                         {
                             $success = false;
@@ -114,7 +114,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'setPinHigh':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false )
                         {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
@@ -124,7 +124,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'setPinLow':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false )
                         {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
@@ -134,7 +134,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         break;
                     case 'getPin':
                         $pin_id = $data['parms']['pin_id'] ?? null;
-                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false )
                         {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
@@ -177,7 +177,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                     case 'setPinsBinary':
                         $dec_value = $data['parms']['value'] ?? null;
                         $pin_array = $data['parms']['pin_array'] ?? [];
-                        if( filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE ||
+                        if( filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false ||
                             empty($pin_array)
                         )
                         {
@@ -194,8 +194,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $select_dir = $data['parms']['select_dir'] ?? null;
                         $high_delay = $data['parms']['high_delay'] ?? null;
                         $low_delay  = $data['parms']['low_delay'] ?? null;
-                        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE ||
-                            filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE ||
+                        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ||
+                            filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false ||
                             empty($pin_array)
                         )
                         {
@@ -219,8 +219,8 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $count      = $data['parms']['count'] ?? null;
                         $off_count  = $data['parms']['off_count'] ?? null;
                         $period     = $data['parms']['period'] ?? null;
-                        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE ||
-                            filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) == FALSE ||
+                        if( filter_var( $select_pin, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false ||
+                            filter_var( $dec_value, FILTER_VALIDATE_INT, self::VALUE_FILTER_OPTIONS ) === false ||
                             empty($pin_array)
                         )
                         {
@@ -235,7 +235,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $count     = $data['parms']['count'] ?? null;
                         $high_delay  = $data['parms']['high_delay'] ?? null;
                         $low_delay = $data['parms']['low_delay'] ?? null;
-                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false )
                         {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
@@ -249,7 +249,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                         $count     = $data['parms']['count'] ?? null;
                         $on_delay  = $data['parms']['on_delay'] ?? null;
                         $off_delay = $data['parms']['off_delay'] ?? null;
-                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) == FALSE )
+                        if( filter_var( $pin_id, FILTER_VALIDATE_INT, self::PIN_FILTER_OPTIONS ) === false )
                         {
                             $success = false;
                             $this->log($function_call.' with empty pin_id', $data);
