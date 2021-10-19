@@ -326,7 +326,7 @@ class GPIOSysVClt implements GPIOSysVInterface
             $error_code = 9999;
             return false;
         }
-        $block_time = $blocking ? $count*$period : null;
+        $block_time = $blocking ? $period : null;
         return $this->dispatch($data, $error_code, $block_time);
     }
 
