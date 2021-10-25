@@ -183,9 +183,9 @@ class GPIOSysVClt implements GPIOSysVInterface
         // Now wait for the answer (OMG)
         $seg = msg_get_queue($msg_queue_id);
         // Wait a reasonable amount of time before giving up
-        pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
+        \pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
         // Set an alarm to wait for 1 second before checking for "still_running"
-        pcntl_alarm(1);
+        \pcntl_alarm(1);
 
         if ( msg_receive($seg, $msg_type_expect, $msg_type, self::MSG_MAX_SIZE,
             $response, true, 0, $error_code) )

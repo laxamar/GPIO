@@ -58,10 +58,10 @@ class GPIOSysVSrv implements GPIOSysVInterface
         $success    = true; // re-initialized inside loop
         $no_blocking = false; // Make sure server does not do extra blocking
 
-        pcntl_async_signals(TRUE);
+        \pcntl_async_signals(TRUE);
 
         // setup signal handlers
-        pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
+        \pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
 
         while ($this->still_running)
         {
@@ -69,7 +69,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
             // if ($this->debug) $this->log( 'Messages in the msg_queue: ' . $stat['msg_qnum'] );
             // if ($stat['msg_qnum'] > 0) {
             // Set an alarm to wait for 1 second before checking for "still_running"
-            pcntl_alarm(1);
+            \pcntl_alarm(1);
             while (msg_receive($seg, self::MSG_TYPE_GPIO, $msg_type, self::MSG_MAX_SIZE,
                     $data, true, 0, $error_code) )
             {
@@ -195,7 +195,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
                 }
             }
         }
-        pcntl_signal(SIGALRM, null);
+        \pcntl_signal(SIGALRM, null);
 
     }
 
