@@ -368,7 +368,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
         $tot_count = ($count+$off_count)*($count+$off_count);
         $on_delay  = $period*$count/$tot_count;
         $off_delay = $period*$off_count/$tot_count;
-        if ($this->debug) $this->log(__METHOD__.' D:'.$delay.' V:'.$value , $binary);
+        if ($this->debug) $this->log(__METHOD__.' D:'.$on_delay.' V:'.$value , $binary);
         if (empty($select_dir)) {
             return $this->flashPinHighLow($select_pin, $count, $on_delay, $off_delay, $error_code);
         } else {

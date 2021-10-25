@@ -15,7 +15,7 @@ if [ -f /bin/yum ]; then
   yum install redhat-lsb-core
 fi
 # Update logrotate
-case "`/usr/bin/lsb_release -si`" in
+case "$(/usr/bin/lsb_release -si)" in
   Ubuntu)
     echo 'This is Ubuntu Linux'
     chown syslog:syslog ${LOG_PATH}lax*.log
