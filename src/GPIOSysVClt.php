@@ -218,8 +218,10 @@ class GPIOSysVClt implements GPIOSysVInterface
     public function getPinArrayDec(array $pin_array, ?int &$error_code=null) : ?int
     {
         $state = $this->getPinArray($pin_array, $error_code);
+        $this->log(__METHOD__. ' Response ', ['state' => $state, 'error' => $error_code]);
         if (empty($state) || !empty($error_code))
         {
+            $this->log(__METHOD__. ' did not receive msg back', ['state' => $state, 'error' => $error_code]);
             return null;
         }
         return bindec(implode(' ', array_reverse($state['array_status'])));
