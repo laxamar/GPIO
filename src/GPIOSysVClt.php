@@ -224,7 +224,7 @@ class GPIOSysVClt implements GPIOSysVInterface
             $this->log(__METHOD__. ' did not receive msg back', ['state' => $state, 'error' => $error_code]);
             return null;
         }
-        return bindec(implode(' ', array_reverse($state['array_status'])));
+        return bindec(implode(' ', array_reverse($state)));
     }
 
     /**
