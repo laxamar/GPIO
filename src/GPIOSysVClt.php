@@ -7,17 +7,6 @@ class GPIOSysVClt implements GPIOSysVInterface
     static private $instance;
     private bool $debug;
     const DEBUG_FILE = '/var/tmp/GPIOSysVClt.log';
-    const PIN_FILTER_OPTIONS = [
-        'options' => [
-            'min_range' => 1,
-            'max_range' => 40
-        ]
-    ];
-    const VALUE_FILTER_OPTIONS = [
-        'options' => [
-            'min_range' => 0
-        ]
-    ];
 
     static public function getInstance()
     {
@@ -204,6 +193,8 @@ class GPIOSysVClt implements GPIOSysVInterface
             return $response;
         } else {
             $this->log(__METHOD__. ' did not receive msg back', ['data' => $data, 'response' => $response, 'error' => $error_code]);
+            // CLEAR THE RETURN QUEUE OR WE OUT OF SPACE!!!!
+            $this->cleanMsgQueue();
             $error_code ??= 9999;
             return null;
         }
@@ -398,6 +389,7 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function cleanMsgQueue()
     {
+        // Clean the receive back qeueue
         $seg = msg_get_queue(self::MSG_BACK_ID);
         // $mst = self::MSG_TYPE_GPIO;
         $message = null;
@@ -419,6 +411,28 @@ class GPIOSysVClt implements GPIOSysVInterface
             {
                 if ($this->debug) $this->log(__METHOD__, ['msg_type' => $received_message_type, 'message' => $message]);
             }
+        }
+        msg_remove_queue($seg);
+
+        // Clean the send queue in case no one is listening
+        $seg = msg_get_queue(self::MSG_QUEUE_ID);
+        $mst = self::MSG_TYPE_GPIO;
+        $message = null;
+        $received_message_type = null;
+        $error_code = null;
+
+        while ( msg_receive(
+            $seg,
+            $mst,
+            $received_message_type,
+            self::MSG_MAX_SIZE,
+            $message,
+            true,
+            MSG_IPC_NOWAIT,
+            $error_code
+        ) )
+        {
+            if ($this->debug) $this->log(__METHOD__, ['msg_type' => $received_message_type, 'message' => $message]);
         }
         msg_remove_queue($seg);
     }
