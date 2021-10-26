@@ -182,6 +182,7 @@ class GPIOSysVClt implements GPIOSysVInterface
         $this->dispatch($data, $error_code);
         // Now wait for the answer (OMG)
         $seg = msg_get_queue($msg_queue_id);
+        // TODO: Check for existence of pcntl_* functions and take other(?) timeout action
         // Wait a reasonable amount of time before giving up
         \pcntl_signal(SIGALRM, [$this, "sigAlarmHandler"]);
         // Set an alarm to wait for 1 second before checking for "still_running"
@@ -218,7 +219,6 @@ class GPIOSysVClt implements GPIOSysVInterface
     public function getPinArrayDec(array $pin_array, ?int &$error_code=null) : ?int
     {
         $state = $this->getPinArray($pin_array, $error_code);
-        $this->log(__METHOD__. ' Response ', ['state' => $state, 'error' => $error_code]);
         if (empty($state) || !empty($error_code))
         {
             $this->log(__METHOD__. ' did not receive msg back', ['state' => $state, 'error' => $error_code]);
