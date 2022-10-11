@@ -374,6 +374,42 @@ class GPIOSysVClt implements GPIOSysVInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function shiftDataBit(array $PINs, int $bit, ?int $delay=0, ?bool $blocking=false, ?int &$error_code = null) : ?bool
+    {
+
+        $data = [
+            'function' => 'shiftDataBit',
+            'parms'    => [
+                'pin_array'  => $PINs,
+                'pin_value'  => $bit,
+                'delay'      => $delay,
+            ]
+        ];
+        $block_time = $blocking ? 2*$delay : null;
+        return $this->dispatch($data, $error_code, $block_time);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function shiftDataArray(array $PINs, array $bit_array, ?int $delay=0, ?bool $blocking=false, ?int &$error_code = null) : ?bool
+    {
+        $data = [
+            'function' => 'shiftDataArray',
+            'parms'    => [
+                'pin_array'  => $PINs,
+                'value_array'  => $bit_array,
+                'delay'      => $delay,
+            ]
+        ];
+        $block_time = $blocking ? (count($bit_array)*2+2)*$delay : null;
+        return $this->dispatch($data, $error_code, $block_time);
+    }
+
+
+    /**
      * log error or status to a file
      * @param string $message - to be logged
      * @param array|null $data - option $data array passed as a parameter through SysV
@@ -389,7 +425,7 @@ class GPIOSysVClt implements GPIOSysVInterface
      */
     public function cleanMsgQueue()
     {
-        // Clean the receive back qeueue
+        // Clean the receive back queue
         $seg = msg_get_queue(self::MSG_BACK_ID);
         // $mst = self::MSG_TYPE_GPIO;
         $message = null;

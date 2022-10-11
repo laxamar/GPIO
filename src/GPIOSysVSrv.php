@@ -7,24 +7,13 @@ use PiPHP\GPIO\GPIO;
 class GPIOSysVSrv implements GPIOSysVInterface
 {
     static private $instance;
-    private $gpio_obj;
+    private object $gpio_obj;
     private bool $debug = false;
     public bool $still_running;
-    public const VALUE_LOW = 0;
-    public const VALUE_HIGH = 1;
+    // public const VALUE_LOW = 0;
+    // public const VALUE_HIGH = 1;
 
     const DEBUG_FILE = '/var/tmp/GPIOSysVSrv.log';
-    const PIN_FILTER_OPTIONS = [
-        'options' => [
-            'min_range' => 1,
-            'max_range' => 40
-        ]
-    ];
-    const VALUE_FILTER_OPTIONS = [
-        'options' => [
-            'min_range' => 0
-        ]
-    ];
 
     /**
      * Singleton object to handle all pins
@@ -37,7 +26,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
             $this_class = get_called_class();
             $_local_obj = new $this_class();
 
-            $_local_obj->gpio_obj = new \PiPHP\GPIO\GPIO();
+            $_local_obj->gpio_obj = new GPIO(); // PiPHP\GPIO\GPIO();
             // Default debug off
             // $_local_obj->debug = false;
 
@@ -56,7 +45,7 @@ class GPIOSysVSrv implements GPIOSysVInterface
         $data     = null;
         $error_code = null;
         $success    = true; // re-initialized inside loop
-        $no_blocking = false; // Make sure server does not do extra blocking
+        $no_blocking = false; // Constant to make sure server does not do extra blocking by making $blocking == false;
 
         \pcntl_async_signals(TRUE);
 
@@ -181,6 +170,22 @@ class GPIOSysVSrv implements GPIOSysVInterface
                             $on_delay = $data['parms']['on_delay'] ?? null;
                             $off_delay = $data['parms']['off_delay'] ?? null;
                             $success &= $this->flashPinLowHigh($pin_id, $count, $on_delay, $off_delay, $no_blocking, $error_code);
+                            break;
+                        case 'shiftDataBit':
+                            $PINs = $data['parms']['pin_array'] ?? null;
+                            // $PINs['SR_CLK'] = $data['parms']['SR_CLK'] ?? null;
+                            // $PINs['REG_CLK'] = $data['parms']['REG_CLK'] ?? null;
+                            $delay = $data['parms']['delay'] ?? 0;
+                            $bit = $data['parms']['pin_value'] ?? null;
+                            $success &= $this->shiftDataBit($PINs, $bit, $delay, $no_blocking, $error_code);
+                            break;
+                        case 'shiftDataArray':
+                            $PINs = $data['parms']['pin_array'] ?? null;
+                            // $PINs['SR_CLK'] = $data['parms']['SR_CLK'] ?? null;
+                            // $PINs['REG_CLK'] = $data['parms']['REG_CLK'] ?? null;
+                            $delay = $data['parms']['delay'] ?? 0;
+                            $bit_array = $data['parms']['value_array'] ?? null;
+                            $success &= $this->shiftDataArray($PINs, $bit_array, $delay, $no_blocking, $error_code);
                             break;
                         default:
                             // Log error
@@ -385,11 +390,15 @@ class GPIOSysVSrv implements GPIOSysVInterface
                                     ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         $return_status = true;
+        $pin = $this->gpio_obj->getOutputPin($pin_id);
+
         for ($seq=1; $seq <= $count; $seq++)
         {
-            $return_status &= $this->setPinHigh($pin_id, $error_code);
+            $pin->setValue(self::VALUE_HIGH);
+            // $return_status &= $this->setPinHigh($pin_id, $error_code);
             usleep($high_delay);
-            $return_status &= $this->setPinLow($pin_id, $error_code);
+            $pin->setValue(self::VALUE_LOW);
+            // $return_status &= $this->setPinLow($pin_id, $error_code);
             usleep($low_delay);
         }
         return $return_status;
@@ -402,13 +411,59 @@ class GPIOSysVSrv implements GPIOSysVInterface
                                     ?bool $blocking=false, ?int &$error_code=null) : ?bool
     {
         $return_status = true;
+        $pin = $this->gpio_obj->getOutputPin($pin_id);
+
         for ($seq=1; $seq <= $count; $seq++)
         {
-            $return_status &= $this->setPinLow($pin_id, $error_code);
-            usleep($low_delay);
-            $return_status &= $this->setPinHigh($pin_id, $error_code);
+            $pin->setValue(self::VALUE_LOW);
+            // $return_status &= $this->setPinHigh($pin_id, $error_code);
             usleep($high_delay);
+            $pin->setValue(self::VALUE_HIGH);
+            // $return_status &= $this->setPinLow($pin_id, $error_code);
+            usleep($low_delay);
         }
+        return $return_status;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function shiftDataBit(array $PINs, int $bit, ?int $delay=0, ?bool $blocking=false, ?int &$error_code = null) : ?bool
+    {
+        $return_status = true;
+        $return_status &= $this->setPin($PINs['SHIFT_OUT'], $bit, $error_code);
+        $return_status &= $this->setPin($PINs['SR_CLK'], self::VALUE_HIGH, $error_code);
+        // usleep(CLOCK_FRQ);
+        $return_status &= $this->setPin($PINs['SR_CLK'], self::VALUE_LOW, $error_code);
+        $return_status &= $this->setPin($PINs['REG_CLK'], self::VALUE_HIGH, $error_code);
+        // usleep(CLOCK_FRQ);
+        $return_status &= $this->setPin($PINs['REG_CLK'], self::VALUE_LOW, $error_code);
+        return $return_status;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function shiftDataArray(array $PINs, array $bit_array, ?int $delay=0, ?bool $blocking=false, ?int &$error_code = null) : ?bool
+    {
+        $return_status = true;
+        // You have to send the bit array last to first
+        $bits = count($bit_array);
+        $shift_out = $this->gpio_obj->getOutputPin($$PINs['SHIFT_OUT']);
+        $sr_clk    = $this->gpio_obj->getOutputPin($$PINs['SR_CLK']);
+        $reg_clk   = $this->gpio_obj->getOutputPin($$PINs['REG_CLK']);
+        for ($dot = $bits-1; $dot >=0; $dot--)
+        {
+            $bit = $bit_array[$dot];
+            $shift_out->setValue($bit);
+            $sr_clk->setValue(self::VALUE_HIGH);
+            usleep($delay);
+            $sr_clk->setValue(self::VALUE_LOW);
+        }
+        // store it
+        $reg_clk->setValue(self::VALUE_HIGH);
+        usleep($delay);
+        $reg_clk->setValue(self::VALUE_LOW);
         return $return_status;
     }
 
@@ -490,6 +545,5 @@ class GPIOSysVSrv implements GPIOSysVInterface
         }
         return 0;
     }
-
 
 }

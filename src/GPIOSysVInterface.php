@@ -22,6 +22,9 @@ interface GPIOSysVInterface
     const MSG_BACK_ARRAY = 0x6475;
     const MSG_MAX_SIZE = 2048;
 
+    const VALUE_LOW = 0;
+    const VALUE_HIGH = 1;
+
     const ARRAY_FILTER_OPTIONS = [
         'pin_id'     => [
             'filter' => FILTER_VALIDATE_INT,
@@ -31,7 +34,7 @@ interface GPIOSysVInterface
         'pin_value' => [
             'filter' => FILTER_VALIDATE_INT,
             'flags'    => FILTER_REQUIRE_SCALAR,
-            'options' => array('min_range' => 0)
+            'options' => array('min_range' => self::VALUE_LOW, 'max_range' => self::VALUE_HIGH)
         ],
         'value' => [
             'filter' => FILTER_VALIDATE_INT,
@@ -41,6 +44,11 @@ interface GPIOSysVInterface
             'filter'   => FILTER_VALIDATE_INT,
             'flags'    => FILTER_REQUIRE_ARRAY || FILTER_REQUIRE_SCALAR,
             'options' => array('min_range' => 1, 'max_range' => 40)
+        ],
+        'value_array' => [
+            'filter'   => FILTER_VALIDATE_INT,
+            'flags'    => FILTER_REQUIRE_ARRAY || FILTER_REQUIRE_SCALAR,
+            'options' => array('min_range' => self::VALUE_LOW, 'max_range' => self::VALUE_HIGH)
         ],
         'select_pin' => [
             'filter' => FILTER_VALIDATE_INT,
@@ -61,7 +69,7 @@ interface GPIOSysVInterface
     public function setPin(int $pin_id, int $pin_value, ?int &$error_code=null) : ?bool;
 
     /**
-     * Set pin in output mode - HIGH- Turn on any LEDs
+     * Set pin in output mode - HIGH - Turn on any LEDs
      * @param  int	$pin_id	The GPIO Pin ID used
      * @param  int|null $error_code bubble up error code description
      * @return bool|null
@@ -179,5 +187,29 @@ interface GPIOSysVInterface
      * @access 	public
      */
     public function flashPinLowHigh(int $pin_id, ?int $count = 1, ?int $low_delay = 50000, ?int $high_delay = 50000, ?bool $blocking=false, ?int &$error_code=null) : ?bool;
+
+    /**
+     * Shift a bit using the pins assigned to a shift register
+     * @param array $PINs	The GPIO Pins used
+     * @param int $bit the bit to shift in
+     * @param int|null $delay how long HIGH status will last (in useconds)
+     * @param bool|null $blocking block the caller function to allow for proper timing between client/server (2*$delay)
+     * @param int|null $error_code bubble up error code description
+     * @return bool|null
+     * @access 	public
+     */
+    public function shiftDataBit(array $PINs, int $bit, ?int $delay=null, ?bool $blocking=false, ?int &$error_code=null) : ?bool;
+
+    /**
+     * Shift an array of bist using the pins assigned to a shift register
+     * @param array $PINs	The GPIO Pins used
+     * @param int $bit_array the bit to shift in
+     * @param int|null $delay how long HIGH status will last (in useconds)
+     * @param bool|null $blocking block the caller function to allow for proper timing between client/server (2*$delay)
+     * @param int|null $error_code bubble up error code description
+     * @return bool|null
+     * @access 	public
+     */
+    public function shiftDataArray(array $PINs, array $bit_array, ?int $delay=null, ?bool $blocking=false, ?int &$error_code=null) : ?bool;
 
 }
