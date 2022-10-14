@@ -447,11 +447,11 @@ class GPIOSysVSrv implements GPIOSysVInterface
     public function shiftDataArray(array $PINs, array $bit_array, ?int $delay=0, ?bool $blocking=false, ?int &$error_code = null) : ?bool
     {
         $return_status = true;
-        // You have to send the bit array last to first
         $bits = count($bit_array);
         $shift_out = $this->gpio_obj->getOutputPin($$PINs['SHIFT_OUT']);
         $sr_clk    = $this->gpio_obj->getOutputPin($$PINs['SR_CLK']);
         $reg_clk   = $this->gpio_obj->getOutputPin($$PINs['REG_CLK']);
+        // You have to send the bit array last to first
         for ($dot = $bits-1; $dot >=0; $dot--)
         {
             $bit = $bit_array[$dot];
